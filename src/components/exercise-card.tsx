@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import type { Exercise } from '../data/training-types'
+import type { Exercise, SetLog } from '../data/training-types'
 
 interface ExerciseCardProps {
   readonly exercise: Exercise
   readonly index: number
   readonly isSetChecked: (key: string) => boolean
   readonly onToggleSet: (key: string) => void
-  readonly customLoad: string | null
-  readonly onSetLoad: (load: string) => void
+  readonly getSetLog: (key: string) => SetLog
+  readonly onSaveSetLog: (key: string, log: SetLog) => void
 }
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -19,30 +19,16 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string 
 const buildYouTubeUrl = (name: string): string =>
   `https://www.youtube.com/results?search_query=${encodeURIComponent(name + ' exercicio como fazer')}`
 
-export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, customLoad, onSetLoad }: ExerciseCardProps) {
+export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, getSetLog, onSaveSetLog }: ExerciseCardProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [editingLoad, setEditingLoad] = useState(false)
-  const [loadDraft, setLoadDraft] = useState('')
 
   const setInfo = exercise.sets[0]
-  const displayLoad = customLoad || setInfo.load
   const totalSets = setInfo.sets
   const checkedSets = Array.from({ length: totalSets }, (_, i) =>
     isSetChecked(`${exercise.id}-s${i}`),
   ).filter(Boolean).length
   const isComplete = checkedSets === totalSets
   const cat = CATEGORY_STYLES[exercise.category]
-
-  const handleEditLoad = () => {
-    setLoadDraft(displayLoad)
-    setEditingLoad(true)
-  }
-
-  const handleSaveLoad = () => {
-    const val = loadDraft.trim()
-    onSetLoad(val === setInfo.load ? '' : val)
-    setEditingLoad(false)
-  }
 
   return (
     <div
@@ -76,7 +62,7 @@ export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, custo
               {cat.label}
             </span>
             <span className="text-on-surface-muted">
-              {setInfo.sets}x{setInfo.reps} · {displayLoad} · {setInfo.rest}
+              {setInfo.sets}x{setInfo.reps} · {setInfo.load} · {setInfo.rest}
             </span>
           </div>
         </div>
@@ -105,24 +91,18 @@ export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, custo
             </div>
           )}
 
-          <SetButtons
+          <SetLogGrid
             exerciseId={exercise.id}
             totalSets={totalSets}
+            planReps={setInfo.reps}
+            planLoad={setInfo.load}
             isSetChecked={isSetChecked}
             onToggleSet={onToggleSet}
+            getSetLog={getSetLog}
+            onSaveSetLog={onSaveSetLog}
           />
 
-          <DetailGrid
-            setInfo={setInfo}
-            displayLoad={displayLoad}
-            editingLoad={editingLoad}
-            loadDraft={loadDraft}
-            customLoad={customLoad}
-            onEditLoad={handleEditLoad}
-            onLoadDraftChange={setLoadDraft}
-            onSaveLoad={handleSaveLoad}
-            onResetLoad={() => { onSetLoad(''); setEditingLoad(false) }}
-          />
+          <PlanReference setInfo={setInfo} />
 
           <ExerciseCues cues={exercise.cues} />
 
@@ -133,115 +113,125 @@ export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, custo
   )
 }
 
-function SetButtons({
+function SetLogGrid({
   exerciseId,
   totalSets,
+  planReps,
+  planLoad,
   isSetChecked,
   onToggleSet,
+  getSetLog,
+  onSaveSetLog,
 }: {
   readonly exerciseId: string
   readonly totalSets: number
+  readonly planReps: string
+  readonly planLoad: string
   readonly isSetChecked: (key: string) => boolean
   readonly onToggleSet: (key: string) => void
+  readonly getSetLog: (key: string) => SetLog
+  readonly onSaveSetLog: (key: string, log: SetLog) => void
 }) {
   return (
-    <div className="mb-3 flex flex-wrap gap-1">
-      {Array.from({ length: totalSets }, (_, i) => {
-        const setKey = `${exerciseId}-s${i}`
-        const checked = isSetChecked(setKey)
-        return (
-          <button
-            key={setKey}
-            onClick={() => onToggleSet(setKey)}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
-              checked
-                ? 'border-primary-300 bg-primary-500 text-white'
-                : 'border-gray-200 bg-gray-50 text-on-surface-muted hover:bg-gray-100'
-            }`}
-          >
-            S{i + 1}
-          </button>
-        )
-      })}
+    <div className="mb-3 rounded-lg bg-gray-50 p-2">
+      <div className="mb-1.5 grid grid-cols-[40px_1fr_1fr] gap-1.5 text-center text-[9px] font-semibold text-on-surface-muted">
+        <div>Serie</div>
+        <div>Reps</div>
+        <div>Carga</div>
+      </div>
+      <div className="space-y-1.5">
+        {Array.from({ length: totalSets }, (_, i) => {
+          const setKey = `${exerciseId}-s${i}`
+          return (
+            <SetLogRow
+              key={setKey}
+              setIndex={i}
+              planReps={planReps}
+              planLoad={planLoad}
+              checked={isSetChecked(setKey)}
+              onToggle={() => onToggleSet(setKey)}
+              log={getSetLog(setKey)}
+              onSave={(log) => onSaveSetLog(setKey, log)}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-function DetailGrid({
-  setInfo,
-  displayLoad,
-  editingLoad,
-  loadDraft,
-  customLoad,
-  onEditLoad,
-  onLoadDraftChange,
-  onSaveLoad,
-  onResetLoad,
+function SetLogRow({
+  setIndex,
+  planReps,
+  planLoad,
+  checked,
+  onToggle,
+  log,
+  onSave,
 }: {
-  readonly setInfo: { reps: string; load: string; rest: string; rir: string }
-  readonly displayLoad: string
-  readonly editingLoad: boolean
-  readonly loadDraft: string
-  readonly customLoad: string | null
-  readonly onEditLoad: () => void
-  readonly onLoadDraftChange: (v: string) => void
-  readonly onSaveLoad: () => void
-  readonly onResetLoad: () => void
+  readonly setIndex: number
+  readonly planReps: string
+  readonly planLoad: string
+  readonly checked: boolean
+  readonly onToggle: () => void
+  readonly log: SetLog
+  readonly onSave: (log: SetLog) => void
 }) {
-  return (
-    <div className="rounded-lg bg-gray-50 p-2">
-      <div className="grid grid-cols-4 gap-1 text-center text-[10px]">
-        <div>
-          <div className="font-semibold text-on-surface">{setInfo.reps}</div>
-          <div className="text-on-surface-muted">reps</div>
-        </div>
-        <div
-          className="cursor-pointer rounded transition-colors hover:bg-orange-50"
-          onClick={(e) => { e.stopPropagation(); onEditLoad() }}
-        >
-          {editingLoad ? (
-            <input
-              autoFocus
-              type="text"
-              value={loadDraft}
-              onChange={(e) => onLoadDraftChange(e.target.value)}
-              onBlur={onSaveLoad}
-              onKeyDown={(e) => e.key === 'Enter' && onSaveLoad()}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full rounded border border-orange-300 bg-white px-1 text-center text-[10px] font-semibold text-on-surface outline-none"
-            />
-          ) : (
-            <div className={`font-semibold ${customLoad ? 'text-orange-600' : 'text-on-surface'}`}>
-              {displayLoad}
-            </div>
-          )}
-          <div className="text-on-surface-muted">
-            carga {!editingLoad && '✏️'}
-          </div>
-        </div>
-        <div>
-          <div className="font-semibold text-on-surface">{setInfo.rest}</div>
-          <div className="text-on-surface-muted">descanso</div>
-        </div>
-        <div>
-          <div className="font-semibold text-on-surface">{setInfo.rir}</div>
-          <div className="text-on-surface-muted">RIR</div>
-        </div>
-      </div>
+  const [reps, setReps] = useState(log.reps ?? '')
+  const [load, setLoad] = useState(log.load ?? '')
 
-      {customLoad && !editingLoad && (
-        <div className="mt-1 flex items-center justify-center gap-2">
-          <span className="text-[9px] text-on-surface-muted">
-            Plano: {setInfo.load}
-          </span>
-          <button
-            onClick={(e) => { e.stopPropagation(); onResetLoad() }}
-            className="text-[9px] font-medium text-red-500 hover:text-red-700"
-          >
-            Resetar
-          </button>
-        </div>
-      )}
+  const save = () => {
+    onSave({
+      reps: reps.trim() || undefined,
+      load: load.trim() || undefined,
+    })
+  }
+
+  return (
+    <div className="grid grid-cols-[40px_1fr_1fr] gap-1.5">
+      <button
+        onClick={onToggle}
+        className={`flex h-8 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+          checked
+            ? 'border-primary-300 bg-primary-500 text-white'
+            : 'border-gray-200 bg-white text-on-surface-muted hover:bg-gray-100'
+        }`}
+      >
+        S{setIndex + 1}
+      </button>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={reps}
+        placeholder={planReps}
+        onChange={(e) => setReps(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-center text-xs text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
+      />
+      <input
+        type="text"
+        value={load}
+        placeholder={planLoad}
+        onChange={(e) => setLoad(e.target.value)}
+        onBlur={save}
+        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-center text-xs text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
+      />
+    </div>
+  )
+}
+
+function PlanReference({ setInfo }: { readonly setInfo: { reps: string; load: string; rest: string; rir: string } }) {
+  return (
+    <div className="mb-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[9px] text-on-surface-muted">
+      <span>Plano: {setInfo.reps} reps</span>
+      <span>·</span>
+      <span>{setInfo.load}</span>
+      <span>·</span>
+      <span>Descanso {setInfo.rest}</span>
+      <span>·</span>
+      <span>RIR {setInfo.rir}</span>
     </div>
   )
 }

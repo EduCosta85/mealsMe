@@ -65,6 +65,11 @@ export interface DailyCorrectiveItem {
   readonly when: string
 }
 
+export interface SetLog {
+  readonly reps?: string
+  readonly load?: string
+}
+
 export interface TrainingProgress {
   readonly date: string
   readonly mesocycle: Mesocycle
@@ -74,6 +79,6 @@ export interface TrainingProgress {
   readonly checkedCorrectivos: readonly string[]
   readonly lissCompleted: boolean
   readonly notes: string
-  readonly customLoads: Record<string, string>
+  readonly setLogs: Record<string, SetLog>
   readonly startedAt: number | null
 }

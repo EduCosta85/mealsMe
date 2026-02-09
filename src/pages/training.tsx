@@ -195,8 +195,8 @@ function TrainingDayContent({
             index={i}
             isSetChecked={tracker.isExerciseChecked}
             onToggleSet={tracker.toggleExercise}
-            customLoad={tracker.getCustomLoad(ex.id)}
-            onSetLoad={(load) => tracker.setCustomLoad(ex.id, load)}
+            getSetLog={tracker.getSetLog}
+            onSaveSetLog={tracker.setSetLog}
           />
         ))}
       </div>

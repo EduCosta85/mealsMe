@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useStorage } from './use-storage'
 import { todayKey } from '../lib/date-utils'
-import type { Mesocycle, TrainingProgress } from '../data/training-types'
+import type { Mesocycle, SetLog, TrainingProgress } from '../data/training-types'
 
 const EMPTY_PROGRESS: TrainingProgress = {
   date: '',
@@ -12,7 +12,7 @@ const EMPTY_PROGRESS: TrainingProgress = {
   checkedCorrectivos: [],
   lissCompleted: false,
   notes: '',
-  customLoads: {},
+  setLogs: {},
   startedAt: null,
 }
 
@@ -22,6 +22,8 @@ const buildKey = (dateKey: string) => `training_${dateKey}`
 const withDefaults = (p: TrainingProgress): TrainingProgress => ({
   ...EMPTY_PROGRESS,
   ...p,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setLogs: p.setLogs ?? (p as any).customLoads ?? {},
 })
 
 export function useTrainingTracker(dateKey?: string) {
@@ -108,25 +110,26 @@ export function useTrainingTracker(dateKey?: string) {
     })
   }, [setProgress, key])
 
-  const setCustomLoad = useCallback(
-    (exerciseId: string, load: string) => {
+  const setSetLog = useCallback(
+    (setKey: string, log: SetLog) => {
       setProgress((prev) => {
         const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
-        const updated = { ...current.customLoads }
-        if (load) {
-          updated[exerciseId] = load
+        const hasContent = log.reps || log.load
+        const updated = { ...current.setLogs }
+        if (hasContent) {
+          updated[setKey] = log
         } else {
-          delete updated[exerciseId]
+          delete updated[setKey]
         }
-        return { ...current, customLoads: updated }
+        return { ...current, setLogs: updated }
       })
     },
     [setProgress, key],
   )
 
-  const getCustomLoad = useCallback(
-    (exerciseId: string): string | null => validProgress.customLoads[exerciseId] ?? null,
-    [validProgress.customLoads],
+  const getSetLog = useCallback(
+    (setKey: string): SetLog => validProgress.setLogs[setKey] ?? {},
+    [validProgress.setLogs],
   )
 
   const isWarmupChecked = useCallback(
@@ -156,8 +159,8 @@ export function useTrainingTracker(dateKey?: string) {
     toggleCooldown,
     toggleCorrective,
     toggleLiss,
-    setCustomLoad,
-    getCustomLoad,
+    setSetLog,
+    getSetLog,
     isWarmupChecked,
     isExerciseChecked,
     isCooldownChecked,
