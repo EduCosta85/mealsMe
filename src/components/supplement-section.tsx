@@ -1,15 +1,21 @@
 import { SUPPLEMENTS } from '../data/supplements'
+import { SupplementItem } from './supplement-item'
+import type { ActivityState, ActivityStatus } from '../data/types'
 
 interface SupplementSectionProps {
   readonly isSupplementChecked: (id: string) => boolean
   readonly onToggle: (id: string) => void
   readonly checkedCount: number
+  readonly getActivity: (id: string) => ActivityState | undefined
+  readonly onSetActivity: (id: string, status: ActivityStatus) => void
 }
 
 export function SupplementSection({
   isSupplementChecked,
   onToggle,
   checkedCount,
+  getActivity,
+  onSetActivity,
 }: SupplementSectionProps) {
   const total = SUPPLEMENTS.length
   const percent = Math.round((checkedCount / total) * 100)
@@ -27,35 +33,16 @@ export function SupplementSection({
       </div>
 
       <ul className="space-y-2">
-        {SUPPLEMENTS.map((sup) => {
-          const checked = isSupplementChecked(sup.id)
-          return (
-            <li key={sup.id}>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-purple-50/50 p-3 transition-colors active:bg-purple-100">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggle(sup.id)}
-                  className="h-6 w-6 shrink-0 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
-                />
-                <div className="flex-1">
-                  <span
-                    className={`block text-sm font-medium ${
-                      checked ? 'text-purple-300 line-through' : 'text-purple-900'
-                    }`}
-                  >
-                    {sup.name}
-                  </span>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-purple-700/70">
-                    <span>{sup.time}</span>
-                    <span>·</span>
-                    <span>{sup.withMeal}</span>
-                  </div>
-                </div>
-              </label>
-            </li>
-          )
-        })}
+        {SUPPLEMENTS.map((sup) => (
+          <SupplementItem
+            key={sup.id}
+            supplement={sup}
+            isChecked={isSupplementChecked(sup.id)}
+            onToggle={onToggle}
+            activityState={getActivity(sup.id)}
+            onSetActivity={onSetActivity}
+          />
+        ))}
       </ul>
     </div>
   )

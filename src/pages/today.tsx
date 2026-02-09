@@ -44,6 +44,8 @@ export function TodayPage() {
               isFoodChecked={tracker.isFoodChecked}
               onToggleFood={tracker.toggleFood}
               progress={tracker.getMealProgress(meal.id, meal.foods.length)}
+              activityState={tracker.getMealActivity(meal.id)}
+              onSetActivity={tracker.setMealActivity}
             />
           ))}
         </div>
@@ -54,6 +56,8 @@ export function TodayPage() {
           isSupplementChecked={tracker.isSupplementChecked}
           onToggle={tracker.toggleSupplement}
           checkedCount={tracker.totalSupplementsChecked}
+          getActivity={tracker.getSupplementActivity}
+          onSetActivity={tracker.setSupplementActivity}
         />
       </section>
 

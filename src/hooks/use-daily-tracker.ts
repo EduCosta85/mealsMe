@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useStorage } from './use-storage'
 import { todayKey } from '../lib/date-utils'
-import type { DailyProgress } from '../data/types'
+import type { DailyProgress, ActivityStatus, ActivityState } from '../data/types'
 
 const EMPTY_PROGRESS: DailyProgress = {
   date: '',
@@ -98,6 +98,93 @@ export function useDailyTracker(dateKey?: string) {
     [validProgress.checkedFoods],
   )
 
+  const setMealActivity = useCallback(
+    (mealId: string, status: ActivityStatus, options?: { postponedTo?: string; note?: string }) => {
+      setProgress((prev) => {
+        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const activityState: ActivityState = {
+          status,
+          timestamp: Date.now(),
+          ...(options?.postponedTo && { postponedTo: options.postponedTo }),
+          ...(options?.note && { note: options.note }),
+        }
+
+        return {
+          ...current,
+          mealActivities: {
+            ...(current.mealActivities ?? {}),
+            [mealId]: activityState,
+          },
+        }
+      })
+    },
+    [setProgress, key],
+  )
+
+  const getMealActivity = useCallback(
+    (mealId: string): ActivityState | undefined => {
+      return validProgress.mealActivities?.[mealId]
+    },
+    [validProgress.mealActivities],
+  )
+
+  const setSupplementActivity = useCallback(
+    (supplementId: string, status: ActivityStatus, options?: { postponedTo?: string; note?: string }) => {
+      setProgress((prev) => {
+        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const activityState: ActivityState = {
+          status,
+          timestamp: Date.now(),
+          ...(options?.postponedTo && { postponedTo: options.postponedTo }),
+          ...(options?.note && { note: options.note }),
+        }
+
+        return {
+          ...current,
+          supplementActivities: {
+            ...(current.supplementActivities ?? {}),
+            [supplementId]: activityState,
+          },
+        }
+      })
+    },
+    [setProgress, key],
+  )
+
+  const getSupplementActivity = useCallback(
+    (supplementId: string): ActivityState | undefined => {
+      return validProgress.supplementActivities?.[supplementId]
+    },
+    [validProgress.supplementActivities],
+  )
+
+  const setTrainingActivity = useCallback(
+    (status: ActivityStatus, options?: { postponedTo?: string; note?: string }) => {
+      setProgress((prev) => {
+        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const activityState: ActivityState = {
+          status,
+          timestamp: Date.now(),
+          ...(options?.postponedTo && { postponedTo: options.postponedTo }),
+          ...(options?.note && { note: options.note }),
+        }
+
+        return {
+          ...current,
+          trainingActivity: activityState,
+        }
+      })
+    },
+    [setProgress, key],
+  )
+
+  const getTrainingActivity = useCallback(
+    (): ActivityState | undefined => {
+      return validProgress.trainingActivity
+    },
+    [validProgress.trainingActivity],
+  )
+
   const totalFoodsChecked = Object.values(validProgress.checkedFoods)
     .reduce((sum, arr) => sum + arr.length, 0)
 
@@ -111,6 +198,12 @@ export function useDailyTracker(dateKey?: string) {
     isSupplementChecked,
     addWater,
     getMealProgress,
+    setMealActivity,
+    getMealActivity,
+    setSupplementActivity,
+    getSupplementActivity,
+    setTrainingActivity,
+    getTrainingActivity,
     totalFoodsChecked,
     totalSupplementsChecked,
   } as const

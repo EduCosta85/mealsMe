@@ -1,4 +1,4 @@
-type Tab = 'today' | 'week' | 'shopping' | 'training'
+type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history'
 
 interface BottomNavProps {
   readonly active: Tab
@@ -10,6 +10,7 @@ const TABS: readonly { id: Tab; label: string; icon: string }[] = [
   { id: 'week', label: 'Semana', icon: '📊' },
   { id: 'shopping', label: 'Compras', icon: '🛒' },
   { id: 'training', label: 'Treino', icon: '🏋️' },
+  { id: 'history', label: 'Histórico', icon: '📈' },
 ]
 
 export function BottomNav({ active, onChange }: BottomNavProps) {

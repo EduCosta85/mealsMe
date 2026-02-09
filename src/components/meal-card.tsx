@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Meal } from '../data/types'
+import type { Meal, ActivityState, ActivityStatus } from '../data/types'
 import { ProgressRing } from './progress-ring'
 
 interface MealCardProps {
@@ -7,9 +7,11 @@ interface MealCardProps {
   readonly isFoodChecked: (mealId: string, foodIndex: number) => boolean
   readonly onToggleFood: (mealId: string, foodIndex: number) => void
   readonly progress: number
+  readonly activityState?: ActivityState
+  readonly onSetActivity: (mealId: string, status: ActivityStatus) => void
 }
 
-export function MealCard({ meal, isFoodChecked, onToggleFood, progress }: MealCardProps) {
+export function MealCard({ meal, isFoodChecked, onToggleFood, progress, activityState, onSetActivity }: MealCardProps) {
   const [isOpen, setIsOpen] = useState(false)
   const isComplete = progress === 100
 
@@ -121,6 +123,75 @@ export function MealCard({ meal, isFoodChecked, onToggleFood, progress }: MealCa
               )
             })}
           </ul>
+
+          {/* Activity Status Display */}
+          {activityState && activityState.status !== 'pending' && (
+            <div className="mt-3 rounded-lg bg-gray-50 px-3 py-2">
+              <div className="flex items-center gap-2 text-xs">
+                {activityState.status === 'completed' && (
+                  <>
+                    <span className="text-green-600">✅</span>
+                    <span className="font-medium text-green-700">Feito</span>
+                  </>
+                )}
+                {activityState.status === 'skipped' && (
+                  <>
+                    <span className="text-amber-600">⏭️</span>
+                    <span className="font-medium text-amber-700">Pulado</span>
+                  </>
+                )}
+                {activityState.status === 'postponed' && (
+                  <>
+                    <span className="text-blue-600">⏰</span>
+                    <span className="font-medium text-blue-700">Adiado</span>
+                  </>
+                )}
+                {activityState.status === 'missed' && (
+                  <>
+                    <span className="text-red-600">❌</span>
+                    <span className="font-medium text-red-700">Perdido</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Activity Action Buttons */}
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <button
+              onClick={() => onSetActivity(meal.id, 'completed')}
+              className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+                activityState?.status === 'completed'
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+              }`}
+            >
+              <span className="mr-1">✓</span>
+              Feito
+            </button>
+            <button
+              onClick={() => onSetActivity(meal.id, 'skipped')}
+              className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+                activityState?.status === 'skipped'
+                  ? 'border-amber-500 bg-amber-50 text-amber-700'
+                  : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+              }`}
+            >
+              <span className="mr-1">⏭</span>
+              Pular
+            </button>
+            <button
+              onClick={() => onSetActivity(meal.id, 'postponed')}
+              className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+                activityState?.status === 'postponed'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+              }`}
+            >
+              <span className="mr-1">⏰</span>
+              Adiar
+            </button>
+          </div>
         </div>
       )}
     </div>

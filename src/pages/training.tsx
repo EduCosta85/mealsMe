@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useMesocycle, useTrainingTracker } from '../hooks/use-training-tracker'
+import { useDailyTracker } from '../hooks/use-daily-tracker'
 import { MesocycleSelector } from '../components/mesocycle-selector'
 import { WarmupSection } from '../components/warmup-section'
 import { ExerciseCard } from '../components/exercise-card'
@@ -7,6 +8,7 @@ import { CooldownSection } from '../components/cooldown-section'
 import { CorrectivesSection } from '../components/correctives-section'
 import { LissCard } from '../components/liss-card'
 import { SessionTimer } from '../components/session-timer'
+import type { ActivityStatus } from '../data/types'
 import {
   getTodaySessionId,
   isLissDay,
@@ -91,10 +93,93 @@ function SessionHeader({ session }: { readonly session: Pick<TrainingSession, 'n
   )
 }
 
+interface TrainingActivityCardProps {
+  readonly activityState: import('../data/types').ActivityState | undefined
+  readonly onSetActivity: (status: ActivityStatus) => void
+}
+
+function TrainingActivityCard({ activityState, onSetActivity }: TrainingActivityCardProps) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <h3 className="mb-3 text-sm font-semibold text-on-surface">Status do Treino</h3>
+
+      {/* Activity Status Display */}
+      {activityState && activityState.status !== 'pending' && (
+        <div className="mb-3 rounded-lg bg-gray-50 px-3 py-2">
+          <div className="flex items-center gap-2 text-xs">
+            {activityState.status === 'completed' && (
+              <>
+                <span className="text-green-600">✅</span>
+                <span className="font-medium text-green-700">Feito</span>
+              </>
+            )}
+            {activityState.status === 'skipped' && (
+              <>
+                <span className="text-amber-600">⏭️</span>
+                <span className="font-medium text-amber-700">Pulado</span>
+              </>
+            )}
+            {activityState.status === 'postponed' && (
+              <>
+                <span className="text-blue-600">⏰</span>
+                <span className="font-medium text-blue-700">Adiado</span>
+              </>
+            )}
+            {activityState.status === 'missed' && (
+              <>
+                <span className="text-red-600">❌</span>
+                <span className="font-medium text-red-700">Perdido</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Activity Action Buttons */}
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          onClick={() => onSetActivity('completed')}
+          className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+            activityState?.status === 'completed'
+              ? 'border-green-500 bg-green-50 text-green-700'
+              : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+          }`}
+        >
+          <span className="mr-1">✓</span>
+          Feito
+        </button>
+        <button
+          onClick={() => onSetActivity('skipped')}
+          className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+            activityState?.status === 'skipped'
+              ? 'border-amber-500 bg-amber-50 text-amber-700'
+              : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+          }`}
+        >
+          <span className="mr-1">⏭</span>
+          Pular
+        </button>
+        <button
+          onClick={() => onSetActivity('postponed')}
+          className={`h-12 rounded-lg border-2 text-sm font-medium transition-all ${
+            activityState?.status === 'postponed'
+              ? 'border-blue-500 bg-blue-50 text-blue-700'
+              : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+          }`}
+        >
+          <span className="mr-1">⏰</span>
+          Adiar
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function TrainingPage() {
   const today = useMemo(() => new Date(), [])
   const { mesocycle, changeMesocycle } = useMesocycle()
   const tracker = useTrainingTracker()
+  const dailyTracker = useDailyTracker()
 
   const sessionId = getTodaySessionId(today)
   const lissDay = isLissDay(today)
@@ -125,15 +210,25 @@ export function TrainingPage() {
       <MesocycleSelector current={mesocycle} onChange={changeMesocycle} />
 
       {session && (
-        <SessionTimer
-          startedAt={tracker.progress.startedAt}
-          endedAt={tracker.progress.endedAt}
-          isActive={tracker.progress.isActive}
-          expectedMinutes={expectedMinutes}
-          completionPercent={percent}
-          onStart={tracker.startSession}
-          onEnd={tracker.endSession}
-        />
+        <>
+          <SessionTimer
+            startedAt={tracker.progress.startedAt}
+            endedAt={tracker.progress.endedAt}
+            isActive={tracker.progress.isActive}
+            expectedMinutes={expectedMinutes}
+            completionPercent={percent}
+            onStart={tracker.startSession}
+            onEnd={tracker.endSession}
+          />
+          
+          {/* Training Activity Status - shown after session ends */}
+          {tracker.progress.endedAt && (
+            <TrainingActivityCard
+              activityState={dailyTracker.getTrainingActivity()}
+              onSetActivity={(status: ActivityStatus) => dailyTracker.setTrainingActivity(status)}
+            />
+          )}
+        </>
       )}
 
       {!session && <ProgressBar percent={percent} />}
