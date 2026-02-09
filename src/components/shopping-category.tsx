@@ -31,6 +31,9 @@ function ShoppingItemRow({
   const isCovered = toBuy === 0
   const isDone = isCovered || bought
 
+  const increment = () => onSetInventory(item.id, (inventory || 0) + 1)
+  const decrement = () => onSetInventory(item.id, Math.max(0, (inventory || 0) - 1))
+
   return (
     <li className={`rounded-xl border border-transparent px-3 py-3 transition-colors ${isDone ? 'bg-primary-50/30' : 'bg-white hover:border-gray-100'}`}>
       <div className="flex items-start gap-3">
@@ -73,10 +76,18 @@ function ShoppingItemRow({
             )}
           </div>
 
-          <div className="mt-2 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-2 py-1">
-              <span className="text-xs font-medium text-gray-500">Tenho:</span>
-              <div className="flex items-center gap-1">
+          <div className="mt-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-1">
+              <span className="pl-1 text-[10px] font-bold uppercase text-gray-400">Tenho:</span>
+              
+              <button 
+                onClick={decrement}
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-white text-gray-500 shadow-sm active:bg-gray-100"
+              >
+                -
+              </button>
+              
+              <div className="flex items-center gap-1 bg-white px-2 shadow-sm rounded-md h-8 border border-gray-100">
                 <input
                   type="number"
                   min={0}
@@ -84,10 +95,17 @@ function ShoppingItemRow({
                   value={inventory || ''}
                   placeholder="0"
                   onChange={(e) => onSetInventory(item.id, parseFloat(e.target.value) || 0)}
-                  className="w-16 rounded border border-gray-200 bg-white px-1 py-1 text-center text-sm font-semibold text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="w-10 text-center text-sm font-bold text-gray-900 focus:outline-none"
                 />
-                <span className="text-xs text-gray-400">{item.unit}</span>
+                <span className="text-[10px] text-gray-400 font-medium">{item.unit}</span>
               </div>
+
+              <button 
+                onClick={increment}
+                className="flex h-8 w-8 items-center justify-center rounded-md bg-white text-gray-500 shadow-sm active:bg-gray-100"
+              >
+                +
+              </button>
             </div>
 
             <div className="text-right text-[10px] text-gray-400">

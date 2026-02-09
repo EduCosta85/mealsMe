@@ -102,7 +102,11 @@ export function ExerciseCard({ exercise, index, isSetChecked, onToggleSet, getSe
             onSaveSetLog={onSaveSetLog}
           />
 
-          <PlanReference setInfo={setInfo} />
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-gray-500">
+             <span>⏱ Descanso: {setInfo.rest}</span>
+             <span>•</span>
+             <span>RIR: {setInfo.rir}</span>
+          </div>
 
           <ExerciseCues cues={exercise.cues} />
 
@@ -133,29 +137,22 @@ function SetLogGrid({
   readonly onSaveSetLog: (key: string, log: SetLog) => void
 }) {
   return (
-    <div className="mb-3 rounded-lg bg-gray-50 p-2">
-      <div className="mb-2 grid grid-cols-[48px_1fr_1fr] gap-2 text-center text-[10px] font-semibold text-on-surface-muted">
-        <div>Serie</div>
-        <div>Reps</div>
-        <div>Carga</div>
-      </div>
-      <div className="space-y-2">
-        {Array.from({ length: totalSets }, (_, i) => {
-          const setKey = `${exerciseId}-s${i}`
-          return (
-            <SetLogRow
-              key={setKey}
-              setIndex={i}
-              planReps={planReps}
-              planLoad={planLoad}
-              checked={isSetChecked(setKey)}
-              onToggle={() => onToggleSet(setKey)}
-              log={getSetLog(setKey)}
-              onSave={(log) => onSaveSetLog(setKey, log)}
-            />
-          )
-        })}
-      </div>
+    <div className="mb-4 space-y-3">
+      {Array.from({ length: totalSets }, (_, i) => {
+        const setKey = `${exerciseId}-s${i}`
+        return (
+          <SetLogRow
+            key={setKey}
+            setIndex={i}
+            planReps={planReps}
+            planLoad={planLoad}
+            checked={isSetChecked(setKey)}
+            onToggle={() => onToggleSet(setKey)}
+            log={getSetLog(setKey)}
+            onSave={(log) => onSaveSetLog(setKey, log)}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -187,55 +184,89 @@ function SetLogRow({
     })
   }
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select()
+  }
+
   return (
-    <div className="grid grid-cols-[48px_1fr_1fr] gap-2">
-      <button
-        onClick={onToggle}
-        className={`flex h-12 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
-          checked
-            ? 'border-primary-300 bg-primary-500 text-white'
-            : 'border-gray-200 bg-white text-on-surface-muted hover:bg-gray-100'
-        }`}
-      >
-        S{setIndex + 1}
-      </button>
-      <input
-        type="text"
-        inputMode="numeric"
-        value={reps}
-        placeholder={planReps}
-        onChange={(e) => setReps(e.target.value)}
-        onBlur={save}
-        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="h-12 rounded-lg border border-gray-200 bg-white px-2 text-center text-sm text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
-      />
-      <input
-        type="text"
-        value={load}
-        placeholder={planLoad}
-        onChange={(e) => setLoad(e.target.value)}
-        onBlur={save}
-        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="h-12 rounded-lg border border-gray-200 bg-white px-2 text-center text-sm text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
-      />
+    <div
+      className={`rounded-2xl border p-3 transition-all ${
+        checked ? 'border-primary-200 bg-primary-50/30' : 'border-gray-200 bg-gray-50/50'
+      }`}
+    >
+      {/* Header do Set: Info + Checkbox */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-gray-900">Série {setIndex + 1}</span>
+          <span className="text-[11px] text-gray-500">
+            Meta: <span className="font-medium text-gray-700">{planReps}</span> •{' '}
+            <span className="font-medium text-gray-700">{planLoad}</span>
+          </span>
+        </div>
+
+        <button
+          onClick={onToggle}
+          className={`flex h-10 items-center gap-2 rounded-xl px-4 text-xs font-bold transition-all active:scale-95 ${
+            checked
+              ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
+              : 'bg-white text-gray-500 shadow-sm ring-1 ring-gray-200'
+          }`}
+        >
+          {checked ? (
+            <>
+              <span>✓</span> FEITO
+            </>
+          ) : (
+            <span>MARCAR</span>
+          )}
+        </button>
+      </div>
+
+      {/* Inputs Grandes */}
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            Reps
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={reps}
+            placeholder={planReps}
+            onChange={(e) => setReps(e.target.value)}
+            onBlur={save}
+            onFocus={handleFocus}
+            onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+            className={`h-14 w-full rounded-xl border-2 text-center text-xl font-bold text-gray-900 shadow-sm transition-colors focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10 placeholder:text-gray-300 ${
+               checked ? 'border-primary-200 bg-white' : 'border-gray-200 bg-white'
+            }`}
+          />
+        </div>
+
+        <div className="flex-1">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            Carga (kg)
+          </label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={load}
+            placeholder={planLoad}
+            onChange={(e) => setLoad(e.target.value)}
+            onBlur={save}
+            onFocus={handleFocus}
+            onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+            className={`h-14 w-full rounded-xl border-2 text-center text-xl font-bold text-gray-900 shadow-sm transition-colors focus:border-orange-500 focus:outline-none focus:ring-4 focus:ring-orange-500/10 placeholder:text-gray-300 ${
+              checked ? 'border-primary-200 bg-white' : 'border-gray-200 bg-white'
+            }`}
+          />
+        </div>
+      </div>
     </div>
   )
 }
 
-function PlanReference({ setInfo }: { readonly setInfo: { reps: string; load: string; rest: string; rir: string } }) {
-  return (
-    <div className="mb-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-[9px] text-on-surface-muted">
-      <span>Plano: {setInfo.reps} reps</span>
-      <span>·</span>
-      <span>{setInfo.load}</span>
-      <span>·</span>
-      <span>Descanso {setInfo.rest}</span>
-      <span>·</span>
-      <span>RIR {setInfo.rir}</span>
-    </div>
-  )
-}
-
+// removed PlanReference
 function ExerciseCues({ cues }: { readonly cues: readonly string[] }) {
   if (cues.length === 0) return null
   return (
