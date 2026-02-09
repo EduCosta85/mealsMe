@@ -49,12 +49,12 @@ export function CooldownSection({ items, isChecked, onToggle }: CooldownSectionP
               const checked = isChecked(item.id)
               return (
                 <li key={item.id}>
-                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-1.5 hover:bg-sky-100/50 active:bg-sky-100">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 hover:bg-sky-100/50 active:bg-sky-100">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => onToggle(item.id)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-sky-500"
+                      className="mt-0.5 h-6 w-6 shrink-0 accent-sky-500"
                     />
                     <div className="flex-1">
                       <span className={`text-sm ${checked ? 'text-on-surface-muted line-through' : 'text-on-surface'}`}>

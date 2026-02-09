@@ -25,6 +25,11 @@ export function TodayPage() {
         <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-on-surface-muted">
           <span>🍽️</span> Refeicoes ({plan.meals.length})
         </h3>
+        <div className="mb-3 flex flex-wrap gap-3 rounded-lg bg-surface-alt px-3 py-2 text-[10px] text-on-surface-muted">
+          <span>★ Osso/Calcio</span>
+          <span>♥ Cardio/Omega-3</span>
+          <span>⚡ Baixo IG</span>
+        </div>
         <div className="space-y-3">
           {plan.meals.map((meal) => (
             <MealCard

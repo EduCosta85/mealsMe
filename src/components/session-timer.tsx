@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react'
 
 interface SessionTimerProps {
   readonly startedAt: number | null
+  readonly endedAt: number | null
+  readonly isActive: boolean
   readonly expectedMinutes: number
   readonly completionPercent: number
+  readonly onStart: () => void
+  readonly onEnd: () => void
 }
 
 const formatTime = (totalSeconds: number): string => {
@@ -27,24 +31,35 @@ function computePace(timePercent: number, workPercent: number): Pace {
   return 'on-track'
 }
 
-export function SessionTimer({ startedAt, expectedMinutes, completionPercent }: SessionTimerProps) {
+export function SessionTimer({ startedAt, endedAt, isActive, expectedMinutes, completionPercent, onStart, onEnd }: SessionTimerProps) {
   const [elapsed, setElapsed] = useState(0)
 
   useEffect(() => {
-    if (!startedAt) return
-    // Tick immediately (0ms delay) then every second
+    if (!startedAt || !isActive) {
+      if (startedAt && endedAt) {
+        setElapsed(Math.floor((endedAt - startedAt) / 1000))
+      }
+      return
+    }
+    // Active timer: tick every second
     const tick = () => setElapsed(Math.floor((Date.now() - startedAt) / 1000))
     const immediate = setTimeout(tick, 0)
     const id = setInterval(tick, 1000)
     return () => { clearTimeout(immediate); clearInterval(id) }
-  }, [startedAt])
+  }, [startedAt, endedAt, isActive])
 
   if (!startedAt) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-3">
-        <div className="flex items-center gap-2 text-xs text-on-surface-muted">
-          <span>⏱</span>
-          <span>O cronometro inicia ao marcar o primeiro item</span>
+      <div className="rounded-xl border border-gray-200 bg-white p-4">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="text-2xl">⏱</span>
+          <p className="text-sm text-on-surface-muted">Pronto para comecar?</p>
+          <button
+            onClick={onStart}
+            className="w-full rounded-xl bg-primary-500 px-6 py-3 text-sm font-bold text-white active:bg-primary-600"
+          >
+            Iniciar Treino
+          </button>
         </div>
       </div>
     )
@@ -56,7 +71,7 @@ export function SessionTimer({ startedAt, expectedMinutes, completionPercent }: 
   const paceStyle = PACE_STYLES[pace]
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3">
+    <div className="rounded-xl border border-gray-200 bg-white p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm">⏱</span>
@@ -71,16 +86,23 @@ export function SessionTimer({ startedAt, expectedMinutes, completionPercent }: 
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${paceStyle.bg} ${paceStyle.color}`}>
-            {paceStyle.label}
-          </span>
+          {isActive && (
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${paceStyle.bg} ${paceStyle.color}`}>
+              {paceStyle.label}
+            </span>
+          )}
+          {!isActive && endedAt && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+              Finalizado
+            </span>
+          )}
           <span className="text-xs font-medium text-on-surface-muted">
             {completionPercent}%
           </span>
         </div>
       </div>
 
-      <div className="relative mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+      <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-gray-100">
         {/* Expected time progress (background track) */}
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-gray-300/50 transition-all"
@@ -97,6 +119,15 @@ export function SessionTimer({ startedAt, expectedMinutes, completionPercent }: 
         <span>Tempo: {timePercent}%</span>
         <span>Feito: {completionPercent}%</span>
       </div>
+
+      {isActive && (
+        <button
+          onClick={onEnd}
+          className="mt-3 w-full rounded-xl bg-red-500 px-6 py-3 text-sm font-bold text-white active:bg-red-600"
+        >
+          Finalizar Treino
+        </button>
+      )}
     </div>
   )
 }

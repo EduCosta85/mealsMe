@@ -14,6 +14,8 @@ const EMPTY_PROGRESS: TrainingProgress = {
   notes: '',
   setLogs: {},
   startedAt: null,
+  endedAt: null,
+  isActive: false,
 }
 
 const buildKey = (dateKey: string) => `training_${dateKey}`
@@ -36,6 +38,31 @@ export function useTrainingTracker(dateKey?: string) {
   const validProgress =
     progress.date === key ? withDefaults(progress) : { ...EMPTY_PROGRESS, date: key }
 
+  const startSession = useCallback(() => {
+    setProgress((prev) => {
+      const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
+      if (current.isActive) return current
+      return {
+        ...current,
+        startedAt: Date.now(),
+        endedAt: null,
+        isActive: true,
+      }
+    })
+  }, [setProgress, key])
+
+  const endSession = useCallback(() => {
+    setProgress((prev) => {
+      const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
+      if (!current.isActive) return current
+      return {
+        ...current,
+        endedAt: Date.now(),
+        isActive: false,
+      }
+    })
+  }, [setProgress, key])
+
   const toggleWarmup = useCallback(
     (itemId: string) => {
       setProgress((prev) => {
@@ -43,7 +70,6 @@ export function useTrainingTracker(dateKey?: string) {
         const isChecked = current.checkedWarmup.includes(itemId)
         return {
           ...current,
-          startedAt: current.startedAt ?? Date.now(),
           checkedWarmup: isChecked
             ? current.checkedWarmup.filter((id) => id !== itemId)
             : [...current.checkedWarmup, itemId],
@@ -60,7 +86,6 @@ export function useTrainingTracker(dateKey?: string) {
         const isChecked = current.checkedExercises.includes(exerciseKey)
         return {
           ...current,
-          startedAt: current.startedAt ?? Date.now(),
           checkedExercises: isChecked
             ? current.checkedExercises.filter((id) => id !== exerciseKey)
             : [...current.checkedExercises, exerciseKey],
@@ -77,7 +102,6 @@ export function useTrainingTracker(dateKey?: string) {
         const isChecked = current.checkedCooldown.includes(itemId)
         return {
           ...current,
-          startedAt: current.startedAt ?? Date.now(),
           checkedCooldown: isChecked
             ? current.checkedCooldown.filter((id) => id !== itemId)
             : [...current.checkedCooldown, itemId],
@@ -154,6 +178,8 @@ export function useTrainingTracker(dateKey?: string) {
 
   return {
     progress: validProgress,
+    startSession,
+    endSession,
     toggleWarmup,
     toggleExercise,
     toggleCooldown,

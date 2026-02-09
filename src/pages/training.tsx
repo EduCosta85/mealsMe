@@ -116,7 +116,7 @@ export function TrainingPage() {
   )
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 px-4 pb-24 pt-4">
+    <div className="space-y-4 pb-4">
       <div className="text-center">
         <h1 className="text-lg font-bold text-on-surface">Treino</h1>
         <p className="text-xs text-on-surface-muted">{formatToday(today)}</p>
@@ -127,8 +127,12 @@ export function TrainingPage() {
       {session && (
         <SessionTimer
           startedAt={tracker.progress.startedAt}
+          endedAt={tracker.progress.endedAt}
+          isActive={tracker.progress.isActive}
           expectedMinutes={expectedMinutes}
           completionPercent={percent}
+          onStart={tracker.startSession}
+          onEnd={tracker.endSession}
         />
       )}
 

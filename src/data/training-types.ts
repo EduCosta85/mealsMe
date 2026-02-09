@@ -81,4 +81,6 @@ export interface TrainingProgress {
   readonly notes: string
   readonly setLogs: Record<string, SetLog>
   readonly startedAt: number | null
+  readonly endedAt: number | null
+  readonly isActive: boolean
 }

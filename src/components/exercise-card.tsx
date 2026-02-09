@@ -134,12 +134,12 @@ function SetLogGrid({
 }) {
   return (
     <div className="mb-3 rounded-lg bg-gray-50 p-2">
-      <div className="mb-1.5 grid grid-cols-[40px_1fr_1fr] gap-1.5 text-center text-[9px] font-semibold text-on-surface-muted">
+      <div className="mb-2 grid grid-cols-[48px_1fr_1fr] gap-2 text-center text-[10px] font-semibold text-on-surface-muted">
         <div>Serie</div>
         <div>Reps</div>
         <div>Carga</div>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {Array.from({ length: totalSets }, (_, i) => {
           const setKey = `${exerciseId}-s${i}`
           return (
@@ -188,10 +188,10 @@ function SetLogRow({
   }
 
   return (
-    <div className="grid grid-cols-[40px_1fr_1fr] gap-1.5">
+    <div className="grid grid-cols-[48px_1fr_1fr] gap-2">
       <button
         onClick={onToggle}
-        className={`flex h-8 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+        className={`flex h-12 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
           checked
             ? 'border-primary-300 bg-primary-500 text-white'
             : 'border-gray-200 bg-white text-on-surface-muted hover:bg-gray-100'
@@ -207,7 +207,7 @@ function SetLogRow({
         onChange={(e) => setReps(e.target.value)}
         onBlur={save}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-center text-xs text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
+        className="h-12 rounded-lg border border-gray-200 bg-white px-2 text-center text-sm text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
       />
       <input
         type="text"
@@ -216,7 +216,7 @@ function SetLogRow({
         onChange={(e) => setLoad(e.target.value)}
         onBlur={save}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-center text-xs text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
+        className="h-12 rounded-lg border border-gray-200 bg-white px-2 text-center text-sm text-on-surface placeholder:text-gray-300 focus:border-orange-300 focus:outline-none"
       />
     </div>
   )
