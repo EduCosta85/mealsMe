@@ -29,59 +29,61 @@ function DaySummary({ date, isToday }: DaySummaryProps) {
 
   return (
     <div
-      className={`rounded-xl border p-3 ${
+      className={`rounded-2xl border p-4 transition-all ${
         isToday
-          ? 'border-primary-300 bg-primary-50/50 ring-2 ring-primary-200'
-          : 'border-gray-200 bg-white'
+          ? 'border-primary-400 bg-primary-50 ring-4 ring-primary-100'
+          : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-on-surface">
+            <span className="text-base font-bold text-gray-900">
               {plan.shortLabel}
             </span>
             {isToday && (
-              <span className="rounded-sm bg-primary-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              <span className="rounded-full bg-primary-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
                 HOJE
               </span>
             )}
           </div>
-          <span
-            className={`text-[10px] font-medium ${
-              isTraining ? 'text-orange-600' : 'text-sky-600'
-            }`}
-          >
-            {isTraining ? plan.training : 'Descanso'}
-          </span>
+          <div className="mt-1 flex items-center gap-2">
+            <span
+              className={`flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${
+                isTraining ? 'bg-orange-100 text-orange-700' : 'bg-sky-100 text-sky-700'
+              }`}
+            >
+              {isTraining ? '🏋️ Treino' : '💤 Descanso'}
+            </span>
+          </div>
         </div>
 
         <ProgressRing
           percent={percent}
-          size={44}
-          strokeWidth={3}
+          size={52}
+          strokeWidth={5}
           label={`${percent}%`}
         />
       </div>
 
-      <div className="mt-2 grid grid-cols-3 gap-1 text-center text-[10px]">
-        <div className="rounded bg-gray-50 py-1">
-          <div className="font-semibold text-on-surface">
-            {tracker.totalFoodsChecked}/{totalFoods}
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-xl bg-gray-50 p-2">
+          <div className="text-sm font-bold text-gray-900">
+            {tracker.totalFoodsChecked}<span className="text-gray-400">/</span>{totalFoods}
           </div>
-          <div className="text-on-surface-muted">itens</div>
+          <div className="text-[10px] font-medium text-gray-500 uppercase tracking-wide">Refeic.</div>
         </div>
-        <div className="rounded bg-purple-50 py-1">
-          <div className="font-semibold text-purple-700">
-            {tracker.totalSupplementsChecked}/{totalSupplements}
+        <div className="rounded-xl bg-purple-50 p-2">
+          <div className="text-sm font-bold text-purple-700">
+            {tracker.totalSupplementsChecked}<span className="text-purple-300">/</span>{totalSupplements}
           </div>
-          <div className="text-on-surface-muted">suplem.</div>
+          <div className="text-[10px] font-medium text-purple-600 uppercase tracking-wide">Suplem.</div>
         </div>
-        <div className="rounded bg-blue-50 py-1">
-          <div className="font-semibold text-blue-700">
+        <div className="rounded-xl bg-blue-50 p-2">
+          <div className="text-sm font-bold text-blue-700">
             {waterPercent}%
           </div>
-          <div className="text-on-surface-muted">agua</div>
+          <div className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Agua</div>
         </div>
       </div>
     </div>

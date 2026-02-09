@@ -55,58 +55,68 @@ export function ShoppingPage() {
     <div className="space-y-4 pb-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-on-surface">Lista de Compras</h2>
-          <p className="mt-1 text-xs text-on-surface-muted">
-            Semanal · R${totalCost.min}-{totalCost.max}
+          <h2 className="text-xl font-bold text-gray-900">Lista de Compras</h2>
+          <p className="mt-0.5 text-sm text-gray-500">
+            R${totalCost.min}-{totalCost.max} estim.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={handleExport}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all active:scale-95 ${
               copied
-                ? 'bg-primary-100 text-primary-700'
-                : 'bg-gray-100 text-on-surface-muted hover:bg-gray-200 active:bg-gray-300'
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-surface-alt text-gray-700 hover:bg-gray-200'
             }`}
           >
-            {copied ? '✓ Copiado!' : '📋 Exportar'}
+            {copied ? (
+              <>
+                <span className="text-lg">✓</span> Copiado
+              </>
+            ) : (
+              <>
+                <span className="text-lg">📋</span> Exportar
+              </>
+            )}
           </button>
 
-          <ProgressRing
-            percent={overallPercent}
-            size={48}
-            strokeWidth={4}
-            label={`${overallPercent}%`}
-          />
+          <div className="flex flex-col items-center">
+             <ProgressRing
+              percent={overallPercent}
+              size={48}
+              strokeWidth={4}
+              label={`${overallPercent}%`}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-lg bg-orange-50 px-3 py-2 text-center">
-          <div className="text-sm font-bold text-orange-700">{tracker.totalItemsToBuy}</div>
-          <div className="text-[10px] text-orange-600">a comprar</div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="flex flex-col items-center rounded-xl bg-orange-50 p-3 text-center ring-1 ring-orange-100">
+          <span className="text-2xl font-bold text-orange-700">{tracker.totalItemsToBuy}</span>
+          <span className="text-xs font-medium text-orange-600">a comprar</span>
         </div>
-        <div className="rounded-lg bg-blue-50 px-3 py-2 text-center">
-          <div className="text-sm font-bold text-blue-700">{tracker.totalItemsBought}</div>
-          <div className="text-[10px] text-blue-600">comprados</div>
+        <div className="flex flex-col items-center rounded-xl bg-blue-50 p-3 text-center ring-1 ring-blue-100">
+          <span className="text-2xl font-bold text-blue-700">{tracker.totalItemsBought}</span>
+          <span className="text-xs font-medium text-blue-600">carrinho</span>
         </div>
-        <div className="rounded-lg bg-primary-50 px-3 py-2 text-center">
-          <div className="text-sm font-bold text-primary-700">{tracker.itemsCovered}</div>
-          <div className="text-[10px] text-primary-600">resolvidos</div>
+        <div className="flex flex-col items-center rounded-xl bg-emerald-50 p-3 text-center ring-1 ring-emerald-100">
+          <span className="text-2xl font-bold text-emerald-700">{tracker.itemsCovered}</span>
+          <span className="text-xs font-medium text-emerald-600">em casa</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-lg bg-surface-alt px-3 py-2">
-        <span className="text-[11px] text-on-surface-muted">
-          Preencha "Tenho" com o que ja tem em casa
+      <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+        <span className="text-xs font-medium text-gray-500">
+          💡 Marque o que você já tem em "Tenho"
         </span>
         {(tracker.totalItemsBought > 0 || Object.keys(tracker.progress.inventory).length > 0) && (
           <button
             onClick={tracker.resetAll}
-            className="text-xs font-medium text-red-500 hover:text-red-700"
+            className="text-xs font-bold text-red-500 transition-colors hover:text-red-700 active:text-red-800"
           >
-            Limpar
+            Limpar tudo
           </button>
         )}
       </div>

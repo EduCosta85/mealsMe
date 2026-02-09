@@ -30,35 +30,38 @@ export function WaterTracker({ currentMl, targetLiters, onAdd }: WaterTrackerPro
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-1 gap-2">
           {WATER_STEPS.map((ml) => (
             <button
               key={ml}
               onClick={() => onAdd(ml)}
-              className="rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white active:bg-blue-600"
+              className="flex-1 rounded-xl bg-blue-500 py-3 text-sm font-bold text-white shadow-sm transition-transform active:scale-95 active:bg-blue-600"
             >
-              +{ml}mL
+              +{ml}
             </button>
           ))}
         </div>
+      </div>
+      
+      <div className="mt-3 flex items-center justify-between px-1">
         {remaining > 0 ? (
-          <span className="text-xs text-blue-600">
-            Faltam {(remaining / 1000).toFixed(1)}L
+          <span className="text-xs font-medium text-blue-600">
+            Faltam {(remaining / 1000).toFixed(1)}L para a meta
           </span>
         ) : (
-          <span className="text-xs font-semibold text-blue-700">Meta atingida!</span>
+          <span className="text-xs font-bold text-emerald-600">🎉 Meta atingida!</span>
+        )}
+
+        {currentMl > 0 && (
+          <button
+            onClick={() => onAdd(-200)}
+            className="text-xs font-medium text-blue-400 hover:text-blue-600 active:text-blue-700"
+          >
+            Desfazer (-200mL)
+          </button>
         )}
       </div>
-
-      {currentMl > 0 && (
-        <button
-          onClick={() => onAdd(-200)}
-          className="mt-2 text-xs text-blue-400 hover:text-blue-600"
-        >
-          Remover 200mL
-        </button>
-      )}
     </div>
   )
 }

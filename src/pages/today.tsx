@@ -22,15 +22,21 @@ export function TodayPage() {
       <DayHeader plan={plan} overallPercent={overallPercent} />
 
       <section>
-        <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-on-surface-muted">
+        <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900">
           <span>🍽️</span> Refeicoes ({plan.meals.length})
         </h3>
-        <div className="mb-3 flex flex-wrap gap-3 rounded-lg bg-surface-alt px-3 py-2 text-[10px] text-on-surface-muted">
-          <span>★ Osso/Calcio</span>
-          <span>♥ Cardio/Omega-3</span>
-          <span>⚡ Baixo IG</span>
+        <div className="mb-4 flex flex-wrap gap-2 rounded-xl bg-gray-50 p-3 text-xs text-gray-500">
+          <span className="flex items-center gap-1 rounded bg-white px-2 py-1 shadow-sm">
+            <span className="text-yellow-500">★</span> Osso/Calcio
+          </span>
+          <span className="flex items-center gap-1 rounded bg-white px-2 py-1 shadow-sm">
+            <span className="text-red-500">♥</span> Cardio/Omega-3
+          </span>
+          <span className="flex items-center gap-1 rounded bg-white px-2 py-1 shadow-sm">
+            <span className="text-amber-500">⚡</span> Baixo IG
+          </span>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {plan.meals.map((meal) => (
             <MealCard
               key={meal.id}

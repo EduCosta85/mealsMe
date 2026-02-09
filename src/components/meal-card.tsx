@@ -83,32 +83,38 @@ export function MealCard({ meal, isFoodChecked, onToggleFood, progress }: MealCa
             </div>
           )}
 
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {meal.foods.map((food, idx) => {
               const checked = isFoodChecked(meal.id, idx)
               return (
                 <li key={idx}>
-                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 hover:bg-gray-50 active:bg-gray-100">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-gray-50/50 p-3 transition-colors active:bg-gray-100">
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => onToggleFood(meal.id, idx)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-primary-500"
+                      className="h-6 w-6 shrink-0 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                     />
                     <div className="flex-1">
-                      <span
-                        className={`text-sm ${checked ? 'text-on-surface-muted line-through' : 'text-on-surface'}`}
-                      >
-                        {food.name}
-                      </span>
-                      <span className="ml-2 text-xs text-on-surface-muted">
-                        {food.quantity}
-                      </span>
-                      {food.tags && food.tags.length > 0 && (
-                        <span className="ml-1.5 text-xs">
-                          {food.tags.join(' ')}
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`text-sm font-medium ${
+                            checked ? 'text-gray-400 line-through' : 'text-gray-900'
+                          }`}
+                        >
+                          {food.name}
                         </span>
-                      )}
+                        {food.tags && food.tags.length > 0 && (
+                          <div className="flex gap-1">
+                            {food.tags.map((tag) => (
+                              <span key={tag} className="text-xs">{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-0.5 text-xs text-gray-500">
+                        {food.quantity}
+                      </div>
                     </div>
                   </label>
                 </li>

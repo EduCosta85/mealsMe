@@ -26,25 +26,27 @@ export function SupplementSection({
         </span>
       </div>
 
-      <ul className="space-y-1">
+      <ul className="space-y-2">
         {SUPPLEMENTS.map((sup) => {
           const checked = isSupplementChecked(sup.id)
           return (
             <li key={sup.id}>
-              <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 hover:bg-purple-100/50 active:bg-purple-100">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-purple-50/50 p-3 transition-colors active:bg-purple-100">
                 <input
                   type="checkbox"
                   checked={checked}
                   onChange={() => onToggle(sup.id)}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-purple-500"
+                  className="h-6 w-6 shrink-0 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
                 />
                 <div className="flex-1">
                   <span
-                    className={`text-sm ${checked ? 'text-on-surface-muted line-through' : 'text-on-surface'}`}
+                    className={`block text-sm font-medium ${
+                      checked ? 'text-purple-300 line-through' : 'text-purple-900'
+                    }`}
                   >
                     {sup.name}
                   </span>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-on-surface-muted">
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-purple-700/70">
                     <span>{sup.time}</span>
                     <span>·</span>
                     <span>{sup.withMeal}</span>
