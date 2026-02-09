@@ -12,9 +12,17 @@ const EMPTY_PROGRESS: TrainingProgress = {
   checkedCorrectivos: [],
   lissCompleted: false,
   notes: '',
+  customLoads: {},
+  startedAt: null,
 }
 
 const buildKey = (dateKey: string) => `training_${dateKey}`
+
+// Ensure backward compat: old stored data may lack new fields
+const withDefaults = (p: TrainingProgress): TrainingProgress => ({
+  ...EMPTY_PROGRESS,
+  ...p,
+})
 
 export function useTrainingTracker(dateKey?: string) {
   const key = dateKey ?? todayKey()
@@ -24,15 +32,16 @@ export function useTrainingTracker(dateKey?: string) {
   )
 
   const validProgress =
-    progress.date === key ? progress : { ...EMPTY_PROGRESS, date: key }
+    progress.date === key ? withDefaults(progress) : { ...EMPTY_PROGRESS, date: key }
 
   const toggleWarmup = useCallback(
     (itemId: string) => {
       setProgress((prev) => {
-        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
         const isChecked = current.checkedWarmup.includes(itemId)
         return {
           ...current,
+          startedAt: current.startedAt ?? Date.now(),
           checkedWarmup: isChecked
             ? current.checkedWarmup.filter((id) => id !== itemId)
             : [...current.checkedWarmup, itemId],
@@ -45,10 +54,11 @@ export function useTrainingTracker(dateKey?: string) {
   const toggleExercise = useCallback(
     (exerciseKey: string) => {
       setProgress((prev) => {
-        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
         const isChecked = current.checkedExercises.includes(exerciseKey)
         return {
           ...current,
+          startedAt: current.startedAt ?? Date.now(),
           checkedExercises: isChecked
             ? current.checkedExercises.filter((id) => id !== exerciseKey)
             : [...current.checkedExercises, exerciseKey],
@@ -61,10 +71,11 @@ export function useTrainingTracker(dateKey?: string) {
   const toggleCooldown = useCallback(
     (itemId: string) => {
       setProgress((prev) => {
-        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
         const isChecked = current.checkedCooldown.includes(itemId)
         return {
           ...current,
+          startedAt: current.startedAt ?? Date.now(),
           checkedCooldown: isChecked
             ? current.checkedCooldown.filter((id) => id !== itemId)
             : [...current.checkedCooldown, itemId],
@@ -77,7 +88,7 @@ export function useTrainingTracker(dateKey?: string) {
   const toggleCorrective = useCallback(
     (itemId: string) => {
       setProgress((prev) => {
-        const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+        const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
         const isChecked = current.checkedCorrectivos.includes(itemId)
         return {
           ...current,
@@ -92,10 +103,31 @@ export function useTrainingTracker(dateKey?: string) {
 
   const toggleLiss = useCallback(() => {
     setProgress((prev) => {
-      const current = prev.date === key ? prev : { ...EMPTY_PROGRESS, date: key }
+      const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
       return { ...current, lissCompleted: !current.lissCompleted }
     })
   }, [setProgress, key])
+
+  const setCustomLoad = useCallback(
+    (exerciseId: string, load: string) => {
+      setProgress((prev) => {
+        const current = prev.date === key ? withDefaults(prev) : { ...EMPTY_PROGRESS, date: key }
+        const updated = { ...current.customLoads }
+        if (load) {
+          updated[exerciseId] = load
+        } else {
+          delete updated[exerciseId]
+        }
+        return { ...current, customLoads: updated }
+      })
+    },
+    [setProgress, key],
+  )
+
+  const getCustomLoad = useCallback(
+    (exerciseId: string): string | null => validProgress.customLoads[exerciseId] ?? null,
+    [validProgress.customLoads],
+  )
 
   const isWarmupChecked = useCallback(
     (itemId: string): boolean => validProgress.checkedWarmup.includes(itemId),
@@ -124,6 +156,8 @@ export function useTrainingTracker(dateKey?: string) {
     toggleCooldown,
     toggleCorrective,
     toggleLiss,
+    setCustomLoad,
+    getCustomLoad,
     isWarmupChecked,
     isExerciseChecked,
     isCooldownChecked,

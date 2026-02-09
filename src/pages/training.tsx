@@ -6,6 +6,7 @@ import { ExerciseCard } from '../components/exercise-card'
 import { CooldownSection } from '../components/cooldown-section'
 import { CorrectivesSection } from '../components/correctives-section'
 import { LissCard } from '../components/liss-card'
+import { SessionTimer } from '../components/session-timer'
 import {
   getTodaySessionId,
   isLissDay,
@@ -24,7 +25,7 @@ function formatToday(date: Date): string {
   return `${WEEKDAY_NAMES[date.getDay()]}, ${day} ${month}`
 }
 
-// Pure function: compute overall progress percentage
+// Pure: compute overall progress percentage
 function computePercent(
   session: TrainingSession | null,
   isLiss: boolean,
@@ -50,10 +51,27 @@ function computePercent(
     return Math.round((checked / total) * 100)
   }
 
-  // Rest day
   return correctivesTotal > 0
     ? Math.round((correctivesChecked / correctivesTotal) * 100)
     : 0
+}
+
+// Pure: parse rest string like "90s" → 90
+function parseRestSeconds(rest: string): number {
+  const match = rest.match(/\d+/)
+  return match ? parseInt(match[0], 10) : 60
+}
+
+// Pure: estimate total session duration in minutes
+function computeExpectedMinutes(session: TrainingSession): number {
+  const warmup = session.warmup.reduce((sum, w) => sum + w.minutes, 0)
+  const exercises = session.exercises.reduce((sum, ex) => {
+    const sets = ex.sets[0].sets
+    const rest = parseRestSeconds(ex.sets[0].rest)
+    return sum + (sets * (40 + rest)) / 60
+  }, 0)
+  const cooldown = 5
+  return Math.round(warmup + exercises + cooldown)
 }
 
 function SessionHeader({ session }: { readonly session: Pick<TrainingSession, 'name' | 'focus' | 'duration'> }) {
@@ -92,6 +110,11 @@ export function TrainingPage() {
     [session, lissDay, tracker.progress],
   )
 
+  const expectedMinutes = useMemo(
+    () => (session ? computeExpectedMinutes(session) : 0),
+    [session],
+  )
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 px-4 pb-24 pt-4">
       <div className="text-center">
@@ -101,7 +124,15 @@ export function TrainingPage() {
 
       <MesocycleSelector current={mesocycle} onChange={changeMesocycle} />
 
-      <ProgressBar percent={percent} />
+      {session && (
+        <SessionTimer
+          startedAt={tracker.progress.startedAt}
+          expectedMinutes={expectedMinutes}
+          completionPercent={percent}
+        />
+      )}
+
+      {!session && <ProgressBar percent={percent} />}
 
       {session && <TrainingDayContent session={session} tracker={tracker} />}
 
@@ -164,6 +195,8 @@ function TrainingDayContent({
             index={i}
             isSetChecked={tracker.isExerciseChecked}
             onToggleSet={tracker.toggleExercise}
+            customLoad={tracker.getCustomLoad(ex.id)}
+            onSetLoad={(load) => tracker.setCustomLoad(ex.id, load)}
           />
         ))}
       </div>

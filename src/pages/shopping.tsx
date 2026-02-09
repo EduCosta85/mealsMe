@@ -1,15 +1,55 @@
-import { SHOPPING_CATEGORIES, getTotalWeeklyCost } from '../data/shopping-list'
+import { useState, useCallback } from 'react'
+import { SHOPPING_CATEGORIES, getTotalWeeklyCost, getToBuyAmount } from '../data/shopping-list'
 import { useShoppingTracker } from '../hooks/use-shopping-tracker'
 import { ShoppingCategorySection } from '../components/shopping-category'
 import { ProgressRing } from '../components/progress-ring'
 
+// Pure: build export text with items that still need buying
+function buildExportText(
+  getInventory: (id: string) => number,
+  isBought: (id: string) => boolean,
+): string {
+  const lines: string[] = []
+  for (const cat of SHOPPING_CATEGORIES) {
+    for (const item of cat.items) {
+      const inv = getInventory(item.id)
+      const toBuy = getToBuyAmount(item.amount, inv)
+      if (toBuy > 0 && !isBought(item.id)) {
+        lines.push(`${item.name};${toBuy}${item.unit}`)
+      }
+    }
+  }
+  return lines.join('\n')
+}
+
 export function ShoppingPage() {
   const tracker = useShoppingTracker()
   const totalCost = getTotalWeeklyCost()
+  const [copied, setCopied] = useState(false)
 
   const overallPercent = tracker.totalItems === 0
     ? 0
     : Math.round((tracker.itemsCovered / tracker.totalItems) * 100)
+
+  const handleExport = useCallback(async () => {
+    const text = buildExportText(tracker.getInventory, tracker.isBought)
+    if (!text) return
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for older browsers / non-HTTPS
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }, [tracker.getInventory, tracker.isBought])
 
   return (
     <div className="space-y-4 pb-4">
@@ -21,12 +61,25 @@ export function ShoppingPage() {
           </p>
         </div>
 
-        <ProgressRing
-          percent={overallPercent}
-          size={48}
-          strokeWidth={4}
-          label={`${overallPercent}%`}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExport}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              copied
+                ? 'bg-primary-100 text-primary-700'
+                : 'bg-gray-100 text-on-surface-muted hover:bg-gray-200 active:bg-gray-300'
+            }`}
+          >
+            {copied ? '✓ Copiado!' : '📋 Exportar'}
+          </button>
+
+          <ProgressRing
+            percent={overallPercent}
+            size={48}
+            strokeWidth={4}
+            label={`${overallPercent}%`}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">

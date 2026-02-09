@@ -74,4 +74,6 @@ export interface TrainingProgress {
   readonly checkedCorrectivos: readonly string[]
   readonly lissCompleted: boolean
   readonly notes: string
+  readonly customLoads: Record<string, string>
+  readonly startedAt: number | null
 }
