@@ -164,16 +164,15 @@ export function TrainingPage() {
   const tracker = useTrainingTracker()
   const dailyTracker = useDailyTracker()
   
-  // Estado para controlar visualização de treino personalizado
-  const [viewMode, setViewMode] = useState<'today' | 'browse'>('today')
+  // Estado para controlar qual treino está sendo visualizado
   const [selectedSessionId, setSelectedSessionId] = useState<TrainingDayId | null>(null)
 
   const sessionId = getTodaySessionId(today)
   const lissDay = isLissDay(today)
   const restDay = isRestDay(today)
 
-  // Mostrar o treino do dia ou o selecionado pelo usuário
-  const displaySessionId = viewMode === 'browse' && selectedSessionId ? selectedSessionId : sessionId
+  // Mostrar o treino selecionado, ou o do dia se nenhum estiver selecionado
+  const displaySessionId = selectedSessionId || sessionId
   const session = displaySessionId ? getTrainingSession(displaySessionId, mesocycle) : null
   
   const lissSession = lissDay
@@ -190,6 +189,14 @@ export function TrainingPage() {
     [session],
   )
 
+  // Define todos os treinos disponíveis
+  const allWorkouts: Array<{ id: TrainingDayId; name: string; short: string }> = [
+    { id: 'upper-a', name: 'Upper A', short: 'Upper A' },
+    { id: 'lower-a', name: 'Lower A', short: 'Lower A' },
+    { id: 'upper-b', name: 'Upper B', short: 'Upper B' },
+    { id: 'lower-b', name: 'Lower B', short: 'Lower B' },
+  ]
+
   return (
     <div className="space-y-4 pb-4">
       <div className="text-center">
@@ -197,140 +204,65 @@ export function TrainingPage() {
         <p className="text-xs text-on-surface-muted">{formatToday(today)}</p>
       </div>
 
-      {/* Training Day Type - destacado no topo */}
+      {/* Tabs de Treinos - Navegação Horizontal */}
+      <div className="overflow-x-auto">
+        <div className="flex gap-2 pb-2">
+          {allWorkouts.map((workout) => {
+            const isActive = displaySessionId === workout.id
+            const isToday = sessionId === workout.id
+            
+            return (
+              <button
+                key={workout.id}
+                onClick={() => setSelectedSessionId(workout.id)}
+                className={`relative flex-shrink-0 rounded-lg border-2 px-4 py-2.5 text-sm font-bold transition-all ${
+                  isActive
+                    ? 'border-orange-500 bg-orange-500 text-white shadow-md'
+                    : 'border-gray-200 bg-white text-gray-700 active:bg-gray-50'
+                }`}
+              >
+                {workout.name}
+                {isToday && (
+                  <span className={`ml-1.5 rounded px-1.5 py-0.5 text-[9px] font-bold ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-600'
+                  }`}>
+                    HOJE
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Info do Treino Selecionado */}
       {session && (
-        <div className="rounded-xl border-2 border-orange-500 bg-gradient-to-r from-orange-50 to-amber-50 p-4">
+        <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-xl">
-                🏋️
-              </div>
-              <div>
-                <div className="text-lg font-bold text-orange-900">{session.name}</div>
-                <div className="text-xs text-orange-700">{session.focus}</div>
-              </div>
+            <div className="flex-1">
+              <div className="text-sm font-bold text-orange-900">{session.name}</div>
+              <div className="mt-0.5 text-xs text-orange-700">{session.focus}</div>
             </div>
-            <div className="rounded-lg bg-orange-500 px-3 py-1 text-xs font-bold text-white">
+            <div className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-bold text-white">
               {session.duration}
             </div>
           </div>
         </div>
       )}
 
-      {lissSession && !session && (
-        <div className="rounded-xl border-2 border-sky-500 bg-gradient-to-r from-sky-50 to-blue-50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-xl">
-                🏃
-              </div>
-              <div>
-                <div className="text-lg font-bold text-sky-900">{lissSession.name}</div>
-                <div className="text-xs text-sky-700">Cardio Zona 2</div>
-              </div>
-            </div>
-            <div className="rounded-lg bg-sky-500 px-3 py-1 text-xs font-bold text-white">
-              {lissSession.duration}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {restDay && (
-        <div className="rounded-xl border-2 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500 text-xl">
-              😴
-            </div>
-            <div>
-              <div className="text-lg font-bold text-purple-900">Dia de Descanso</div>
-              <div className="text-xs text-purple-700">Recuperação ativa</div>
-            </div>
-          </div>
+      {/* Aviso de Dia de Descanso */}
+      {restDay && !selectedSessionId && !session && (
+        <div className="rounded-xl border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 p-4 text-center">
+          <div className="text-3xl">😴</div>
+          <div className="mt-2 text-sm font-bold text-purple-900">Dia de Descanso</div>
+          <div className="mt-1 text-xs text-purple-700">Recuperação ativa • Faça os corretivos abaixo</div>
         </div>
       )}
 
       <MesocycleSelector current={mesocycle} onChange={changeMesocycle} />
 
-      {/* Navegador de Treinos - Todos os Treinos Disponíveis */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <h3 className="mb-3 text-sm font-semibold text-gray-900">Todos os Treinos</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => {
-              setViewMode('browse')
-              setSelectedSessionId('upper-a')
-            }}
-            className={`rounded-lg border-2 p-3 text-left transition-all ${
-              displaySessionId === 'upper-a'
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-200 bg-white active:bg-gray-50'
-            }`}
-          >
-            <div className="text-xs font-bold text-gray-900">UPPER A</div>
-            <div className="mt-0.5 text-[10px] text-gray-600">Push + Ombros</div>
-          </button>
-          
-          <button
-            onClick={() => {
-              setViewMode('browse')
-              setSelectedSessionId('lower-a')
-            }}
-            className={`rounded-lg border-2 p-3 text-left transition-all ${
-              displaySessionId === 'lower-a'
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-200 bg-white active:bg-gray-50'
-            }`}
-          >
-            <div className="text-xs font-bold text-gray-900">LOWER A</div>
-            <div className="mt-0.5 text-[10px] text-gray-600">Quad + Glúteos</div>
-          </button>
-          
-          <button
-            onClick={() => {
-              setViewMode('browse')
-              setSelectedSessionId('upper-b')
-            }}
-            className={`rounded-lg border-2 p-3 text-left transition-all ${
-              displaySessionId === 'upper-b'
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-200 bg-white active:bg-gray-50'
-            }`}
-          >
-            <div className="text-xs font-bold text-gray-900">UPPER B</div>
-            <div className="mt-0.5 text-[10px] text-gray-600">Pull + Acessórios</div>
-          </button>
-          
-          <button
-            onClick={() => {
-              setViewMode('browse')
-              setSelectedSessionId('lower-b')
-            }}
-            className={`rounded-lg border-2 p-3 text-left transition-all ${
-              displaySessionId === 'lower-b'
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-200 bg-white active:bg-gray-50'
-            }`}
-          >
-            <div className="text-xs font-bold text-gray-900">LOWER B</div>
-            <div className="mt-0.5 text-[10px] text-gray-600">Posterior + RDL</div>
-          </button>
-        </div>
-        
-        {viewMode === 'browse' && (
-          <button
-            onClick={() => {
-              setViewMode('today')
-              setSelectedSessionId(null)
-            }}
-            className="mt-3 w-full rounded-lg bg-gray-100 py-2 text-xs font-medium text-gray-700 active:bg-gray-200"
-          >
-            ← Voltar para Treino de Hoje
-          </button>
-        )}
-      </div>
-
-      {session && (
+      {/* Timer só aparece para o treino DO DIA */}
+      {session && displaySessionId === sessionId && (
         <>
           <SessionTimer
             startedAt={tracker.progress.startedAt}
@@ -350,6 +282,26 @@ export function TrainingPage() {
             />
           )}
         </>
+      )}
+
+      {/* Aviso quando está vendo treino diferente do dia */}
+      {session && displaySessionId !== sessionId && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
+          <div className="text-xs text-blue-700">
+            ℹ️ Você está visualizando <span className="font-bold">{session.name}</span>
+            {sessionId && (
+              <>
+                {' • '}
+                <button
+                  onClick={() => setSelectedSessionId(null)}
+                  className="font-bold underline"
+                >
+                  Ver treino de hoje
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {!session && <ProgressBar percent={percent} />}
