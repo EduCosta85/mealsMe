@@ -8,25 +8,29 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { firebaseCredentials } from './firebase-credentials';
 
 /**
- * Firebase configuration from environment variables
- * All values are loaded from VITE_FIREBASE_* env vars
+ * Firebase configuration
+ * Uses hardcoded credentials for production (safe - protected by Firestore rules)
+ * Uses environment variables for development
  */
-const firebaseConfig = {
+const firebaseConfig = import.meta.env.DEV ? {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-} as const;
+} : firebaseCredentials;
 
 /**
  * Validates that all required Firebase config values are present
- * @throws Error if any required config value is missing
+ * Only runs in development mode
  */
 const validateConfig = (): void => {
+  if (!import.meta.env.DEV) return; // Skip validation in production
+
   const requiredFields = [
     'apiKey',
     'authDomain',
@@ -48,7 +52,7 @@ const validateConfig = (): void => {
   }
 };
 
-// Validate configuration on module load
+// Validate configuration on module load (dev only)
 validateConfig();
 
 /**
