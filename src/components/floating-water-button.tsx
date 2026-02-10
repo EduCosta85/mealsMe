@@ -74,19 +74,50 @@ export function FloatingWaterButton({ currentMl, targetMl, onAdd }: FloatingWate
       <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
         {/* Quick Actions - shown when expanded */}
         {isExpanded && (
-          <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Status Card */}
-            <div className="rounded-xl bg-white p-3 shadow-lg">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600">Agora:</span>
-                <span className="font-bold text-gray-900">{liters}L / {(targetMl / 1000).toFixed(1)}L</span>
+            <div className="rounded-xl bg-white p-3.5 shadow-lg">
+              <div className="flex items-center gap-2">
+                <svg className="h-5 w-5 flex-shrink-0 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Agora:</span>
+                    <span className="font-bold text-gray-900">{liters}L / {(targetMl / 1000).toFixed(1)}L</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Esperado:</span>
+                    <span className="font-bold text-blue-600">{(expectedMl / 1000).toFixed(1)}L ({expectedPercent}%)</span>
+                  </div>
+                </div>
               </div>
-              <div className="mt-1 flex items-center justify-between text-xs">
-                <span className="text-gray-600">Esperado:</span>
-                <span className="font-bold text-blue-600">{(expectedMl / 1000).toFixed(1)}L ({expectedPercent}%)</span>
-              </div>
-              <div className="mt-2 rounded-lg bg-gray-100 px-2 py-1 text-center text-[10px] font-bold">
-                {getStatusText()}
+              <div className={`mt-2.5 flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-bold ${
+                isAhead ? 'bg-emerald-100 text-emerald-700' : 
+                isBehind ? 'bg-rose-100 text-rose-700' : 
+                'bg-blue-100 text-blue-700'
+              }`}>
+                {isAhead && (
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 14l5-5 5 5z"/>
+                  </svg>
+                )}
+                {isBehind && (
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                )}
+                {!isAhead && !isBehind && percent < 100 && (
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 12l3 3 3-3M9 8l3 3 3-3" opacity="0.5"/>
+                  </svg>
+                )}
+                {percent >= 100 && (
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                )}
+                <span>{getStatusText()}</span>
               </div>
             </div>
             
@@ -96,27 +127,42 @@ export function FloatingWaterButton({ currentMl, targetMl, onAdd }: FloatingWate
                 onAdd(200)
                 setIsExpanded(false)
               }}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg active:scale-95"
+              className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg transition-all active:scale-95 hover:shadow-xl"
             >
-              <span className="text-xs font-bold">+200</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span className="text-[10px] font-bold">200ml</span>
+              </div>
             </button>
             <button
               onClick={() => {
                 onAdd(300)
                 setIsExpanded(false)
               }}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg active:scale-95"
+              className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg transition-all active:scale-95 hover:shadow-xl"
             >
-              <span className="text-xs font-bold">+300</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span className="text-[10px] font-bold">300ml</span>
+              </div>
             </button>
             <button
               onClick={() => {
                 onAdd(500)
                 setIsExpanded(false)
               }}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg active:scale-95"
+              className="group flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-indigo-700 text-white shadow-lg transition-all active:scale-95 hover:shadow-xl"
             >
-              <span className="text-xs font-bold">+500</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span className="text-[10px] font-bold">500ml</span>
+              </div>
             </button>
           </div>
         )}
@@ -165,22 +211,29 @@ export function FloatingWaterButton({ currentMl, targetMl, onAdd }: FloatingWate
           </svg>
           
           {/* Icon and Text */}
-          <div className="flex flex-col items-center">
-            <span className="text-xl">💧</span>
-            <span className="text-[9px] font-bold leading-none text-white">
+          <div className="flex flex-col items-center gap-0.5">
+            {/* Water Droplet SVG Icon */}
+            <svg className="h-7 w-7" viewBox="0 0 24 24" fill="white">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+            <span className="text-[10px] font-bold leading-none text-white">
               {liters}L
             </span>
           </div>
           
           {/* Status Indicator */}
           {isAhead && (
-            <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px]">
-              ⬆️
+            <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 shadow-md">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="white">
+                <path d="M7 14l5-5 5 5z"/>
+              </svg>
             </div>
           )}
           {isBehind && (
-            <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px]">
-              ⬇️
+            <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 shadow-md">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="white">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
             </div>
           )}
         </button>
