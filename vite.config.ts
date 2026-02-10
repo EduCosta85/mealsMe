@@ -12,14 +12,16 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'MealsMe',
+        name: 'MealsMe - Plano Alimentar e Treino',
         short_name: 'MealsMe',
-        description: 'Seu app de refeicoes',
-        theme_color: '#10b981',
+        description: 'Acompanhe suas refeições, suplementos, água e treinos diários',
+        theme_color: '#f97316',
         background_color: '#ffffff',
         display: 'standalone',
+        orientation: 'portrait',
         scope: '/mealsMe/',
         start_url: '/mealsMe/',
+        categories: ['health', 'fitness', 'lifestyle'],
         icons: [
           {
             src: 'pwa-192x192.png',
