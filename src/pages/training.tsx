@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useMesocycle, useTrainingTracker } from '../hooks/use-training-tracker'
 import { useDailyTracker } from '../hooks/use-daily-tracker'
 import { MesocycleSelector } from '../components/mesocycle-selector'
@@ -17,7 +17,7 @@ import {
   LISS_SESSIONS,
   DAILY_CORRECTIVES,
 } from '../data/training-plan'
-import type { TrainingSession, TrainingProgress } from '../data/training-types'
+import type { TrainingSession, TrainingProgress, TrainingDayId } from '../data/training-types'
 
 const WEEKDAY_NAMES = ['Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado']
 
@@ -163,12 +163,19 @@ export function TrainingPage() {
   const { mesocycle, changeMesocycle } = useMesocycle()
   const tracker = useTrainingTracker()
   const dailyTracker = useDailyTracker()
+  
+  // Estado para controlar visualização de treino personalizado
+  const [viewMode, setViewMode] = useState<'today' | 'browse'>('today')
+  const [selectedSessionId, setSelectedSessionId] = useState<TrainingDayId | null>(null)
 
   const sessionId = getTodaySessionId(today)
   const lissDay = isLissDay(today)
   const restDay = isRestDay(today)
 
-  const session = sessionId ? getTrainingSession(sessionId, mesocycle) : null
+  // Mostrar o treino do dia ou o selecionado pelo usuário
+  const displaySessionId = viewMode === 'browse' && selectedSessionId ? selectedSessionId : sessionId
+  const session = displaySessionId ? getTrainingSession(displaySessionId, mesocycle) : null
+  
   const lissSession = lissDay
     ? LISS_SESSIONS.find((s) => s.weekday === today.getDay()) ?? LISS_SESSIONS[0]
     : null
@@ -244,6 +251,84 @@ export function TrainingPage() {
       )}
 
       <MesocycleSelector current={mesocycle} onChange={changeMesocycle} />
+
+      {/* Navegador de Treinos - Todos os Treinos Disponíveis */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4">
+        <h3 className="mb-3 text-sm font-semibold text-gray-900">Todos os Treinos</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => {
+              setViewMode('browse')
+              setSelectedSessionId('upper-a')
+            }}
+            className={`rounded-lg border-2 p-3 text-left transition-all ${
+              displaySessionId === 'upper-a'
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 bg-white active:bg-gray-50'
+            }`}
+          >
+            <div className="text-xs font-bold text-gray-900">UPPER A</div>
+            <div className="mt-0.5 text-[10px] text-gray-600">Push + Ombros</div>
+          </button>
+          
+          <button
+            onClick={() => {
+              setViewMode('browse')
+              setSelectedSessionId('lower-a')
+            }}
+            className={`rounded-lg border-2 p-3 text-left transition-all ${
+              displaySessionId === 'lower-a'
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 bg-white active:bg-gray-50'
+            }`}
+          >
+            <div className="text-xs font-bold text-gray-900">LOWER A</div>
+            <div className="mt-0.5 text-[10px] text-gray-600">Quad + Glúteos</div>
+          </button>
+          
+          <button
+            onClick={() => {
+              setViewMode('browse')
+              setSelectedSessionId('upper-b')
+            }}
+            className={`rounded-lg border-2 p-3 text-left transition-all ${
+              displaySessionId === 'upper-b'
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 bg-white active:bg-gray-50'
+            }`}
+          >
+            <div className="text-xs font-bold text-gray-900">UPPER B</div>
+            <div className="mt-0.5 text-[10px] text-gray-600">Pull + Acessórios</div>
+          </button>
+          
+          <button
+            onClick={() => {
+              setViewMode('browse')
+              setSelectedSessionId('lower-b')
+            }}
+            className={`rounded-lg border-2 p-3 text-left transition-all ${
+              displaySessionId === 'lower-b'
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 bg-white active:bg-gray-50'
+            }`}
+          >
+            <div className="text-xs font-bold text-gray-900">LOWER B</div>
+            <div className="mt-0.5 text-[10px] text-gray-600">Posterior + RDL</div>
+          </button>
+        </div>
+        
+        {viewMode === 'browse' && (
+          <button
+            onClick={() => {
+              setViewMode('today')
+              setSelectedSessionId(null)
+            }}
+            className="mt-3 w-full rounded-lg bg-gray-100 py-2 text-xs font-medium text-gray-700 active:bg-gray-200"
+          >
+            ← Voltar para Treino de Hoje
+          </button>
+        )}
+      </div>
 
       {session && (
         <>
