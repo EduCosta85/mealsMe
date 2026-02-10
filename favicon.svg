@@ -1,0 +1,33 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  
+  <!-- Plate Circle -->
+  <circle cx="96" cy="96" r="58" fill="white" opacity="0.95"/>
+  
+  <!-- Fork (left) -->
+  <g transform="translate(58, 60)">
+    <rect x="14" y="0" width="4" height="16" fill="#f97316" rx="2"/>
+    <rect x="10" y="16" width="12" height="48" fill="#f97316" rx="3"/>
+    <rect x="6" y="0" width="4" height="12" fill="#f97316" rx="2"/>
+    <rect x="22" y="0" width="4" height="12" fill="#f97316" rx="2"/>
+  </g>
+  
+  <!-- Knife (right) -->
+  <g transform="translate(112, 60)">
+    <path d="M 4 0 L 8 0 L 10 12 L 6 12 L 4 16 L 2 12 L 0 12 Z" fill="#f97316"/>
+    <rect x="3" y="16" width="4" height="48" fill="#f97316" rx="2"/>
+  </g>
+  
+  <!-- Small decorative elements (food items) -->
+  <circle cx="96" cy="88" r="6" fill="#10b981"/>
+  <circle cx="86" cy="100" r="5" fill="#fbbf24"/>
+  <circle cx="106" cy="100" r="5" fill="#ef4444"/>
+</svg>
