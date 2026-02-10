@@ -1,3 +1,5 @@
+import { useNavigate, useLocation } from 'react-router-dom'
+
 type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance'
 
 interface BottomNavProps {
@@ -15,15 +17,38 @@ const TABS: readonly { id: Tab; label: string; icon: string }[] = [
 ]
 
 export function BottomNav({ active, onChange }: BottomNavProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Determine active tab from location
+  // Note: pathname is relative to basename, so it will be '/finance' not '/mealsMe/finance'
+  const isFinanceRoute = location.pathname.startsWith('/finance') || location.pathname === '/finance'
+  const currentTab = isFinanceRoute ? 'finance' : active
+
+  const handleTabClick = (tab: Tab) => {
+    if (tab === 'finance') {
+      // Navigate to finance route
+      navigate('/finance')
+    } else if (isFinanceRoute) {
+      // If on finance route, go back to home first
+      navigate('/')
+      // Then set the tab after a small delay to ensure navigation completes
+      setTimeout(() => onChange(tab), 10)
+    } else {
+      // Normal tab change
+      onChange(tab)
+    }
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 pb-safe backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-3xl items-center justify-around px-2">
         {TABS.map((tab) => {
-          const isActive = active === tab.id
+          const isActive = currentTab === tab.id
           return (
             <button
               key={tab.id}
-              onClick={() => onChange(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-xl py-1 transition-all active:scale-95 ${
                 isActive ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
               }`}
