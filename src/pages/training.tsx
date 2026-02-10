@@ -76,23 +76,6 @@ function computeExpectedMinutes(session: TrainingSession): number {
   return Math.round(warmup + exercises + cooldown)
 }
 
-function SessionHeader({ session }: { readonly session: Pick<TrainingSession, 'name' | 'focus' | 'duration'> }) {
-  return (
-    <div className="rounded-xl border border-orange-200 bg-orange-50/50 p-3">
-      <div className="flex items-center gap-2">
-        <span className="text-lg">🏋️</span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-orange-800">{session.name}</h2>
-          <p className="truncate text-[10px] text-orange-600">{session.focus}</p>
-        </div>
-        <span className="shrink-0 rounded bg-orange-100 px-2 py-0.5 text-[10px] font-medium text-orange-700">
-          {session.duration}
-        </span>
-      </div>
-    </div>
-  )
-}
-
 interface TrainingActivityCardProps {
   readonly activityState: import('../data/types').ActivityState | undefined
   readonly onSetActivity: (status: ActivityStatus) => void
@@ -207,6 +190,59 @@ export function TrainingPage() {
         <p className="text-xs text-on-surface-muted">{formatToday(today)}</p>
       </div>
 
+      {/* Training Day Type - destacado no topo */}
+      {session && (
+        <div className="rounded-xl border-2 border-orange-500 bg-gradient-to-r from-orange-50 to-amber-50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-xl">
+                🏋️
+              </div>
+              <div>
+                <div className="text-lg font-bold text-orange-900">{session.name}</div>
+                <div className="text-xs text-orange-700">{session.focus}</div>
+              </div>
+            </div>
+            <div className="rounded-lg bg-orange-500 px-3 py-1 text-xs font-bold text-white">
+              {session.duration}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {lissSession && !session && (
+        <div className="rounded-xl border-2 border-sky-500 bg-gradient-to-r from-sky-50 to-blue-50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-xl">
+                🏃
+              </div>
+              <div>
+                <div className="text-lg font-bold text-sky-900">{lissSession.name}</div>
+                <div className="text-xs text-sky-700">Cardio Zona 2</div>
+              </div>
+            </div>
+            <div className="rounded-lg bg-sky-500 px-3 py-1 text-xs font-bold text-white">
+              {lissSession.duration}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {restDay && (
+        <div className="rounded-xl border-2 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500 text-xl">
+              😴
+            </div>
+            <div>
+              <div className="text-lg font-bold text-purple-900">Dia de Descanso</div>
+              <div className="text-xs text-purple-700">Recuperação ativa</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MesocycleSelector current={mesocycle} onChange={changeMesocycle} />
 
       {session && (
@@ -243,8 +279,6 @@ export function TrainingPage() {
         />
       )}
 
-      {restDay && <RestDayCard />}
-
       <CorrectivesSection
         isChecked={tracker.isCorrectiveChecked}
         onToggle={tracker.toggleCorrective}
@@ -279,7 +313,6 @@ function TrainingDayContent({
 }) {
   return (
     <>
-      <SessionHeader session={session} />
       <WarmupSection
         items={session.warmup}
         isChecked={tracker.isWarmupChecked}
@@ -305,17 +338,5 @@ function TrainingDayContent({
         onToggle={tracker.toggleCooldown}
       />
     </>
-  )
-}
-
-function RestDayCard() {
-  return (
-    <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 text-center">
-      <span className="text-2xl">😴</span>
-      <h3 className="mt-2 text-sm font-semibold text-purple-800">Dia de Descanso</h3>
-      <p className="mt-1 text-xs text-purple-600">
-        Recuperacao ativa. Faca os corretivos abaixo.
-      </p>
-    </div>
   )
 }
