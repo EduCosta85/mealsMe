@@ -1,4 +1,7 @@
 import { useState, useMemo } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Layout } from './components/layout'
 import { BottomNav } from './components/bottom-nav'
 import { ReloadPrompt } from './components/reload-prompt'
@@ -11,9 +14,28 @@ import { HistoryPage } from './pages/history'
 import { useDailyTracker } from './hooks/use-daily-tracker'
 import { getDayPlan } from './data/meal-plan'
 
-type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history'
+// Finance Pages
+import FinanceDashboard from './pages/finance/dashboard'
+import AddExpense from './pages/finance/add-expense'
+import History from './pages/finance/history'
+import BudgetPage from './pages/finance/budget'
+import CategoriesPage from './pages/finance/categories'
+import IncomePage from './pages/finance/income'
+import AnalyticsPage from './pages/finance/analytics'
+import RecurringPage from './pages/finance/recurring'
 
-function App() {
+// Auth Pages
+import LoginPage from './pages/login'
+
+type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance'
+
+/**
+ * Main App Component with Tab-Based Navigation
+ * 
+ * Wraps existing tab navigation with React Router for finance pages.
+ * Finance tab navigates to /finance route, other tabs remain tab-based.
+ */
+function TabBasedApp() {
   const [activeTab, setActiveTab] = useState<Tab>('today')
   const tracker = useDailyTracker()
   const plan = useMemo(() => getDayPlan(new Date()), [])
@@ -34,6 +56,102 @@ function App() {
       <BottomNav active={activeTab} onChange={setActiveTab} />
       <ReloadPrompt />
     </Layout>
+  )
+}
+
+/**
+ * App Component with React Router Integration
+ * 
+ * Integrates React Router for finance pages while maintaining
+ * existing tab-based navigation for other sections.
+ * 
+ * Routes:
+ * - / - Tab-based navigation (today, week, shopping, training, history)
+ * - /login - Public login page
+ * - /finance/* - Protected finance routes (requires authentication)
+ */
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter basename="/mealsMe">
+        <Routes>
+          {/* Login Route (Public) */}
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Finance Routes (Protected) */}
+          <Route
+            path="/finance"
+            element={
+              <ProtectedRoute>
+                <FinanceDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/add-expense"
+            element={
+              <ProtectedRoute>
+                <AddExpense />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/history"
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/budget"
+            element={
+              <ProtectedRoute>
+                <BudgetPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/categories"
+            element={
+              <ProtectedRoute>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/income"
+            element={
+              <ProtectedRoute>
+                <IncomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/recurring"
+            element={
+              <ProtectedRoute>
+                <RecurringPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/analytics"
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Tab-Based Navigation (Existing Routes) */}
+          <Route path="/" element={<TabBasedApp />} />
+          
+          {/* Catch-all redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

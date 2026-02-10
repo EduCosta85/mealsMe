@@ -1,0 +1,189 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Check if authenticated user owns the resource
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Validate financial amounts (positive, reasonable range, max 2 decimals)
+    function isValidAmount(amount) {
+      return amount is number && amount > 0 && amount < 1000000;
+    }
+
+    // Validate timestamps (must be valid and not in future)
+    function isValidDate(date) {
+      return date is timestamp && date <= request.time;
+    }
+
+    // Check if document has all required fields
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    // Validate string fields (non-empty, within length limit)
+    function isValidString(str, maxLen) {
+      return str is string && str.size() > 0 && str.size() <= maxLen;
+    }
+
+    // Ensure field remains immutable during updates
+    function isImmutable(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // ============================================
+    // USER DATA - GENERAL READ ACCESS
+    // ============================================
+    
+    // Allow users to read all their own data across all subcollections
+    match /users/{userId}/{document=**} {
+      allow read: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // CATEGORIES
+    // ============================================
+    
+    match /users/{userId}/categories/{categoryId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['name', 'userId'])
+        && isValidString(request.resource.data.name, 50)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt')
+        && isValidString(request.resource.data.name, 50);
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // EXPENSES
+    // ============================================
+    
+    match /users/{userId}/expenses/{expenseId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['amount', 'category', 'date', 'userId'])
+        && isValidAmount(request.resource.data.amount)
+        && isValidDate(request.resource.data.date)
+        && isValidString(request.resource.data.category, 50)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt')
+        && isValidAmount(request.resource.data.amount)
+        && isValidDate(request.resource.data.date);
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // INSTALLMENTS + PAYMENTS SUBCOLLECTION
+    // ============================================
+    
+    match /users/{userId}/installments/{installmentId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['totalAmount', 'installmentAmount', 'totalInstallments', 'userId'])
+        && isValidAmount(request.resource.data.totalAmount)
+        && isValidAmount(request.resource.data.installmentAmount)
+        && request.resource.data.totalInstallments is int
+        && request.resource.data.totalInstallments > 0
+        && request.resource.data.totalInstallments <= 60
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt');
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+      
+      // Payments subcollection
+      match /payments/{paymentId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
+    }
+
+    // ============================================
+    // BUDGETS
+    // ============================================
+    
+    match /users/{userId}/budgets/{month} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['monthlyLimit', 'month', 'userId'])
+        && isValidAmount(request.resource.data.monthlyLimit)
+        && isValidString(request.resource.data.month, 20)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('month')
+        && isValidAmount(request.resource.data.monthlyLimit);
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // INCOME
+    // ============================================
+    
+    match /users/{userId}/income/{incomeId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['amount', 'source', 'date', 'userId'])
+        && isValidAmount(request.resource.data.amount)
+        && isValidDate(request.resource.data.date)
+        && isValidString(request.resource.data.source, 100)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt')
+        && isValidAmount(request.resource.data.amount)
+        && isValidDate(request.resource.data.date);
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // RECURRING TRANSACTIONS
+    // ============================================
+    
+    match /users/{userId}/recurring/{recurringId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['amount', 'category', 'frequency', 'userId'])
+        && isValidAmount(request.resource.data.amount)
+        && isValidString(request.resource.data.category, 50)
+        && isValidString(request.resource.data.frequency, 20)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt')
+        && isValidAmount(request.resource.data.amount);
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+  }
+}
