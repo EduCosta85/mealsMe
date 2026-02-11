@@ -7,6 +7,7 @@ interface TimelineItemProps {
   readonly status: ItemStatus
   readonly progress?: DailyProgress
   readonly onItemClick?: (itemId: string) => void
+  readonly onToggleStatus?: (itemId: string, type: TimelineItem['type']) => void
 }
 
 /**
@@ -93,7 +94,8 @@ export function TimelineItemComponent({
   item,
   status,
   progress,
-  onItemClick
+  onItemClick,
+  onToggleStatus
 }: TimelineItemProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -111,6 +113,11 @@ export function TimelineItemComponent({
       e.preventDefault()
       handleClick()
     }
+  }
+
+  const handleStatusClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card expansion
+    onToggleStatus?.(item.id, item.type)
   }
 
   return (
@@ -161,19 +168,23 @@ export function TimelineItemComponent({
           )}
         </div>
 
-        {/* Status Badge */}
-        <div
+        {/* Status Badge (Clickable) */}
+        <button
+          onClick={handleStatusClick}
           className={`
             flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium
-            transition-opacity duration-200
+            transition-all duration-200
             ${badge.className}
+            hover:scale-105 hover:shadow-md active:scale-95
+            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1
           `}
-          role="status"
-          aria-label={badge.label}
+          role="button"
+          aria-label={`Mudar status de ${badge.label}`}
+          title="Clique para alterar o status"
         >
           <span>{badge.icon}</span>
           <span className="hidden sm:inline">{badge.label}</span>
-        </div>
+        </button>
 
         {/* Expand/Collapse Arrow */}
         <svg

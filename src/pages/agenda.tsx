@@ -153,6 +153,35 @@ export function AgendaPage() {
   const waterGoalMl = dayPlan.waterLiters * 1000
   const currentWaterMl = tracker.progress.waterMl || 0
   
+  // Handle status toggle
+  const handleToggleStatus = (itemId: string, type: 'meal' | 'supplement' | 'training' | 'water') => {
+    switch (type) {
+      case 'supplement':
+        // Toggle supplement completion
+        tracker.toggleSupplement(itemId)
+        break
+        
+      case 'training': {
+        // Toggle training activity status
+        const currentActivity = tracker.getTrainingActivity()
+        const newStatus = currentActivity?.status === 'completed' ? 'pending' : 'completed'
+        tracker.setTrainingActivity(newStatus)
+        break
+      }
+        
+      case 'meal':
+        // For meals, clicking doesn't toggle - user should expand and check items
+        // This is handled by the card expansion
+        console.log('Meal status toggle - expand card to check individual items')
+        break
+        
+      case 'water':
+        // Water doesn't have a status toggle - use the floating button
+        console.log('Water status toggle - use the floating water button')
+        break
+    }
+  }
+  
   return (
     <Layout>
       <div className="space-y-6 animate-fadeIn">
@@ -223,6 +252,7 @@ export function AgendaPage() {
                     console.log('Timeline item clicked:', itemId)
                     // Future: Navigate to detail view or open modal
                   }}
+                  onToggleStatus={handleToggleStatus}
                 />
               </div>
             ))}
