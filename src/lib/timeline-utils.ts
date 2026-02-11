@@ -1,4 +1,4 @@
-import type { DailyProgress } from '../data/types'
+import type { DailyProgress, FoodItem, Macros } from '../data/types'
 
 // Timeline item types
 export interface TimelineItem {
@@ -8,6 +8,8 @@ export interface TimelineItem {
   readonly title: string
   readonly description?: string
   readonly goal?: number // For water tracking
+  readonly foods?: readonly FoodItem[] // For meals
+  readonly macros?: Macros // For meals
 }
 
 export interface TimelinePeriod {

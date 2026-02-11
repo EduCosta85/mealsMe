@@ -329,10 +329,48 @@ export function TimelineItemComponent({
             </div>
           )}
 
-          {/* Placeholder for future meal/supplement details */}
-          {item.type === 'meal' && (
-            <div className="text-xs text-gray-500 italic">
-              Clique na refeição no painel principal para ver detalhes
+          {/* Meal foods list */}
+          {item.type === 'meal' && item.foods && (
+            <div className="space-y-2">
+              {/* Macros summary */}
+              {item.macros && (
+                <div className="flex flex-wrap gap-2 text-xs text-gray-600 pb-2 border-b border-gray-100">
+                  <span className="font-medium">{item.macros.kcal} kcal</span>
+                  <span>•</span>
+                  <span>P: {item.macros.protein}g</span>
+                  <span>•</span>
+                  <span>C: {item.macros.carbs}g</span>
+                  <span>•</span>
+                  <span>G: {item.macros.fat}g</span>
+                  <span>•</span>
+                  <span>F: {item.macros.fiber}g</span>
+                </div>
+              )}
+              
+              {/* Foods list */}
+              <div className="space-y-1.5">
+                {item.foods.map((food, idx) => (
+                  <div 
+                    key={idx}
+                    className="flex items-start gap-2 text-sm"
+                  >
+                    <span className="text-gray-400 mt-0.5">•</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-gray-700">{food.name}</span>
+                      {food.quantity && (
+                        <span className="text-gray-500 ml-1">
+                          ({food.quantity})
+                        </span>
+                      )}
+                      {food.tags && food.tags.length > 0 && (
+                        <span className="ml-1">
+                          {food.tags.join(' ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

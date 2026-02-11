@@ -45,7 +45,9 @@ export function useTimelineData(date?: Date): UseTimelineDataReturn {
         type: 'meal',
         time: meal.time,
         title: meal.name,
-        description: `${meal.foods.length} items • ${meal.macros.kcal} kcal`
+        description: `${meal.foods.length} items • ${meal.macros.kcal} kcal`,
+        foods: meal.foods,
+        macros: meal.macros
       })
     })
 
