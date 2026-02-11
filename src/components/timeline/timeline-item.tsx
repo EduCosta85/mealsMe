@@ -8,6 +8,8 @@ interface TimelineItemProps {
   readonly progress?: DailyProgress
   readonly onItemClick?: (itemId: string) => void
   readonly onChangeStatus?: (itemId: string, type: TimelineItem['type'], status: ActivityStatus) => void
+  readonly toggleFood?: (mealId: string, foodIndex: number) => void
+  readonly isFoodChecked?: (mealId: string, foodIndex: number) => boolean
 }
 
 /**
@@ -153,7 +155,9 @@ export function TimelineItemComponent({
   status,
   progress,
   onItemClick,
-  onChangeStatus
+  onChangeStatus,
+  toggleFood,
+  isFoodChecked
 }: TimelineItemProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -347,30 +351,67 @@ export function TimelineItemComponent({
                 </div>
               )}
               
-              {/* Foods list */}
+              {/* Foods list with checkboxes */}
               <div className="space-y-1.5">
-                {item.foods.map((food, idx) => (
-                  <div 
-                    key={idx}
-                    className="flex items-start gap-2 text-sm"
-                  >
-                    <span className="text-gray-400 mt-0.5">•</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-gray-700">{food.name}</span>
-                      {food.quantity && (
-                        <span className="text-gray-500 ml-1">
-                          ({food.quantity})
+                {item.foods.map((food, idx) => {
+                  const isChecked = isFoodChecked ? isFoodChecked(item.id, idx) : false
+                  
+                  return (
+                    <label
+                      key={idx}
+                      className="flex items-start gap-2.5 text-sm cursor-pointer group hover:bg-gray-50 -mx-2 px-2 py-1.5 rounded-md transition-colors"
+                    >
+                      {/* Checkbox */}
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleFood?.(item.id, idx)}
+                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-0 cursor-pointer"
+                      />
+                      
+                      {/* Food details */}
+                      <div className={`flex-1 min-w-0 transition-all ${isChecked ? 'opacity-60' : ''}`}>
+                        <span className={`text-gray-700 ${isChecked ? 'line-through' : ''}`}>
+                          {food.name}
                         </span>
-                      )}
-                      {food.tags && food.tags.length > 0 && (
-                        <span className="ml-1">
-                          {food.tags.join(' ')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                        {food.quantity && (
+                          <span className="text-gray-500 ml-1">
+                            ({food.quantity})
+                          </span>
+                        )}
+                        {food.tags && food.tags.length > 0 && (
+                          <span className="ml-1">
+                            {food.tags.join(' ')}
+                          </span>
+                        )}
+                      </div>
+                    </label>
+                  )
+                })}
               </div>
+              
+              {/* Food progress indicator */}
+              {progress && item.foods && (
+                <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
+                  {(() => {
+                    const checkedFoods = progress.checkedFoods[item.id] || []
+                    const totalFoods = item.foods.length
+                    const checkedCount = checkedFoods.length
+                    const percentage = totalFoods > 0 ? Math.round((checkedCount / totalFoods) * 100) : 0
+                    
+                    return (
+                      <div className="flex items-center justify-between">
+                        <span>
+                          {checkedCount} de {totalFoods} itens marcados
+                        </span>
+                        <span className="font-medium">
+                          {percentage}%
+                        </span>
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
             </div>
           )}
 

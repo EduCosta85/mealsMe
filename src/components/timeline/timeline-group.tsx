@@ -8,6 +8,8 @@ interface TimelineGroupProps {
   readonly progress?: DailyProgress
   readonly onItemClick?: (itemId: string) => void
   readonly onChangeStatus?: (itemId: string, type: TimelineItem['type'], status: ActivityStatus) => void
+  readonly toggleFood?: (mealId: string, foodIndex: number) => void
+  readonly isFoodChecked?: (mealId: string, foodIndex: number) => boolean
 }
 
 /**
@@ -63,7 +65,9 @@ export function TimelineGroup({
   period, 
   progress, 
   onItemClick,
-  onChangeStatus
+  onChangeStatus,
+  toggleFood,
+  isFoodChecked
 }: TimelineGroupProps) {
   const config = getPeriodConfig(period.name)
 
@@ -118,6 +122,8 @@ export function TimelineGroup({
                 progress={progress}
                 onItemClick={onItemClick}
                 onChangeStatus={onChangeStatus}
+                toggleFood={toggleFood}
+                isFoodChecked={isFoodChecked}
               />
             </div>
           )

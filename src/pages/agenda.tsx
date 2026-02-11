@@ -247,6 +247,8 @@ export function AgendaPage() {
                     // Future: Navigate to detail view or open modal
                   }}
                   onChangeStatus={handleChangeStatus}
+                  toggleFood={tracker.toggleFood}
+                  isFoodChecked={tracker.isFoodChecked}
                 />
               </div>
             ))}
