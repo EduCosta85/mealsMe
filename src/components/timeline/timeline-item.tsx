@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import type { TimelineItem, ItemStatus } from '../../lib/timeline-utils'
 import type { DailyProgress, ActivityStatus } from '../../data/types'
 
@@ -126,29 +126,11 @@ export function TimelineItemComponent({
   onChangeStatus
 }: TimelineItemProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [showStatusMenu, setShowStatusMenu] = useState(false)
-  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 })
-  const menuRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const badge = getStatusBadge(status)
   const icon = getTypeIcon(item.type)
   const progressText = getProgressText(item, progress)
   const statusOptions = getStatusOptions()
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowStatusMenu(false)
-      }
-    }
-    
-    if (showStatusMenu) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showStatusMenu])
 
   const handleClick = () => {
     setIsExpanded(!isExpanded)
@@ -162,24 +144,8 @@ export function TimelineItemComponent({
     }
   }
 
-  const handleStatusClick = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent card expansion
-    
-    // Calculate position for fixed dropdown
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setMenuPosition({
-        top: rect.bottom + 4, // 4px below button
-        right: window.innerWidth - rect.right // Align to right edge of button
-      })
-    }
-    
-    setShowStatusMenu(!showStatusMenu)
-  }
-
-  const handleStatusSelect = (newStatus: ActivityStatus) => {
+  const handleStatusChange = (newStatus: ActivityStatus) => {
     onChangeStatus?.(item.id, item.type, newStatus)
-    setShowStatusMenu(false)
   }
 
   return (
@@ -230,58 +196,18 @@ export function TimelineItemComponent({
           )}
         </div>
 
-        {/* Status Badge (Clickable) with Dropdown */}
-        <div ref={menuRef}>
-          <button
-            ref={buttonRef}
-            onClick={handleStatusClick}
-            className={`
-              flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium
-              transition-all duration-200
-              ${badge.className}
-              hover:scale-105 hover:shadow-md active:scale-95
-              focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1
-            `}
-            role="button"
-            aria-label={`Mudar status de ${badge.label}`}
-            aria-haspopup="true"
-            aria-expanded={showStatusMenu}
-            title="Clique para alterar o status"
-          >
-            <span>{badge.icon}</span>
-            <span className="hidden sm:inline">{badge.label}</span>
-            <svg 
-              className={`w-3 h-3 transition-transform ${showStatusMenu ? 'rotate-180' : ''}`}
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+        {/* Status Badge (Read-only display) */}
+        <div
+          className={`
+            flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium
+            ${badge.className}
+          `}
+          role="status"
+          aria-label={badge.label}
+        >
+          <span>{badge.icon}</span>
+          <span className="hidden sm:inline">{badge.label}</span>
         </div>
-        
-        {/* Dropdown Menu (Fixed Position - renders outside card) */}
-        {showStatusMenu && (
-          <div 
-            className="fixed z-50 w-40 rounded-lg shadow-xl bg-white border border-gray-200 py-1 animate-fadeIn"
-            style={{
-              top: `${menuPosition.top}px`,
-              right: `${menuPosition.right}px`
-            }}
-          >
-            {statusOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => handleStatusSelect(option.value)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
-              >
-                <span>{option.icon}</span>
-                <span>{option.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Expand/Collapse Arrow */}
         <svg
@@ -310,6 +236,31 @@ export function TimelineItemComponent({
           role="region"
           aria-label="Detalhes do item"
         >
+          {/* Status Change Buttons */}
+          <div className="mb-4">
+            <p className="text-xs font-medium text-gray-600 mb-2">Alterar status:</p>
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleStatusChange(option.value)}
+                  className={`
+                    flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium
+                    transition-all duration-200
+                    ${status === option.value 
+                      ? 'bg-primary-100 text-primary-800 border-primary-300 ring-2 ring-primary-200' 
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                    }
+                    active:scale-95
+                  `}
+                >
+                  <span>{option.icon}</span>
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Description */}
           {item.description && (
             <p className="text-sm text-gray-700 mb-3">
