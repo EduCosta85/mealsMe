@@ -1,5 +1,5 @@
 import type { TimelinePeriod, ItemStatus, TimelineItem } from '../../lib/timeline-utils'
-import type { DailyProgress } from '../../data/types'
+import type { DailyProgress, ActivityStatus } from '../../data/types'
 import { TimelineItemComponent } from './timeline-item'
 import { calculateStatus } from '../../lib/timeline-utils'
 
@@ -7,7 +7,7 @@ interface TimelineGroupProps {
   readonly period: TimelinePeriod
   readonly progress?: DailyProgress
   readonly onItemClick?: (itemId: string) => void
-  readonly onToggleStatus?: (itemId: string, type: TimelineItem['type']) => void
+  readonly onChangeStatus?: (itemId: string, type: TimelineItem['type'], status: ActivityStatus) => void
 }
 
 /**
@@ -63,7 +63,7 @@ export function TimelineGroup({
   period, 
   progress, 
   onItemClick,
-  onToggleStatus
+  onChangeStatus
 }: TimelineGroupProps) {
   const config = getPeriodConfig(period.name)
 
@@ -117,7 +117,7 @@ export function TimelineGroup({
                 status={status}
                 progress={progress}
                 onItemClick={onItemClick}
-                onToggleStatus={onToggleStatus}
+                onChangeStatus={onChangeStatus}
               />
             </div>
           )

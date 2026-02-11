@@ -5,6 +5,7 @@ import { useTimelineData } from '../hooks/useTimelineData'
 import { useDailyTracker } from '../hooks/use-daily-tracker'
 import { getDayPlan } from '../data/meal-plan'
 import { todayKey } from '../lib/date-utils'
+import type { ActivityStatus } from '../data/types'
 
 /**
  * Format date for display (e.g., "Sexta, 11 Fev 2026")
@@ -153,31 +154,24 @@ export function AgendaPage() {
   const waterGoalMl = dayPlan.waterLiters * 1000
   const currentWaterMl = tracker.progress.waterMl || 0
   
-  // Handle status toggle
-  const handleToggleStatus = (itemId: string, type: 'meal' | 'supplement' | 'training' | 'water') => {
+  // Handle status change
+  const handleChangeStatus = (itemId: string, type: 'meal' | 'supplement' | 'training' | 'water', status: ActivityStatus) => {
     switch (type) {
       case 'supplement':
-        // Toggle supplement completion
-        tracker.toggleSupplement(itemId)
+        tracker.setSupplementActivity(itemId, status)
         break
         
-      case 'training': {
-        // Toggle training activity status
-        const currentActivity = tracker.getTrainingActivity()
-        const newStatus = currentActivity?.status === 'completed' ? 'pending' : 'completed'
-        tracker.setTrainingActivity(newStatus)
+      case 'training':
+        tracker.setTrainingActivity(status)
         break
-      }
         
       case 'meal':
-        // For meals, clicking doesn't toggle - user should expand and check items
-        // This is handled by the card expansion
-        console.log('Meal status toggle - expand card to check individual items')
+        tracker.setMealActivity(itemId, status)
         break
         
       case 'water':
-        // Water doesn't have a status toggle - use the floating button
-        console.log('Water status toggle - use the floating water button')
+        // Water doesn't use activity status - use the floating button
+        console.log('Water progress - use the floating water button')
         break
     }
   }
@@ -252,7 +246,7 @@ export function AgendaPage() {
                     console.log('Timeline item clicked:', itemId)
                     // Future: Navigate to detail view or open modal
                   }}
-                  onToggleStatus={handleToggleStatus}
+                  onChangeStatus={handleChangeStatus}
                 />
               </div>
             ))}
