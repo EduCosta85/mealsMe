@@ -267,27 +267,29 @@ export function TimelineItemComponent({
           aria-label="Detalhes do item"
         >
           {/* Status Change Buttons */}
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-gray-700 mb-2.5">Alterar status:</p>
+          <div className="mb-3 pb-3 border-b border-gray-100">
             <div className="flex flex-wrap gap-2">
-              {statusOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleStatusChange(option.value)}
-                  className={`
-                    flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 text-sm font-semibold
-                    transition-all duration-200
-                    ${status === option.value 
-                      ? `${option.colors} ring-2 ring-offset-2 ring-current shadow-md scale-105` 
-                      : `${option.colors} opacity-70 hover:opacity-100 hover:shadow-sm`
-                    }
-                    active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2
-                  `}
-                >
-                  <span className="text-base">{option.icon}</span>
-                  <span>{option.label}</span>
-                </button>
-              ))}
+              {statusOptions.map((option) => {
+                const isActive = status === option.value
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleStatusChange(option.value)}
+                    className={`
+                      flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium
+                      transition-all duration-150
+                      ${isActive 
+                        ? 'bg-gray-900 text-white shadow-sm' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }
+                      active:scale-95
+                    `}
+                  >
+                    <span className="text-sm">{option.icon}</span>
+                    <span>{option.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
