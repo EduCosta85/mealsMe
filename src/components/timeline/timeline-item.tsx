@@ -127,7 +127,9 @@ export function TimelineItemComponent({
 }: TimelineItemProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showStatusMenu, setShowStatusMenu] = useState(false)
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 })
   const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const badge = getStatusBadge(status)
   const icon = getTypeIcon(item.type)
@@ -162,6 +164,16 @@ export function TimelineItemComponent({
 
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent card expansion
+    
+    // Calculate position for fixed dropdown
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setMenuPosition({
+        top: rect.bottom + 4, // 4px below button
+        right: window.innerWidth - rect.right // Align to right edge of button
+      })
+    }
+    
     setShowStatusMenu(!showStatusMenu)
   }
 
@@ -219,8 +231,9 @@ export function TimelineItemComponent({
         </div>
 
         {/* Status Badge (Clickable) with Dropdown */}
-        <div className="relative" ref={menuRef}>
+        <div ref={menuRef}>
           <button
+            ref={buttonRef}
             onClick={handleStatusClick}
             className={`
               flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium
@@ -246,23 +259,29 @@ export function TimelineItemComponent({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-
-          {/* Dropdown Menu */}
-          {showStatusMenu && (
-            <div className="absolute right-0 mt-1 z-10 w-40 rounded-lg shadow-lg bg-white border border-gray-200 py-1 animate-fadeIn">
-              {statusOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleStatusSelect(option.value)}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
-                >
-                  <span>{option.icon}</span>
-                  <span>{option.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
+        
+        {/* Dropdown Menu (Fixed Position - renders outside card) */}
+        {showStatusMenu && (
+          <div 
+            className="fixed z-50 w-40 rounded-lg shadow-xl bg-white border border-gray-200 py-1 animate-fadeIn"
+            style={{
+              top: `${menuPosition.top}px`,
+              right: `${menuPosition.right}px`
+            }}
+          >
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleStatusSelect(option.value)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
+              >
+                <span>{option.icon}</span>
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Expand/Collapse Arrow */}
         <svg
