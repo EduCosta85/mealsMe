@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
 import { useStorage } from './use-storage'
+import { useFirestoreDailyProgress } from './useFirestoreDailyProgress'
+import { useAuth } from './useAuth'
 import { todayKey } from '../lib/date-utils'
 import type { DailyProgress, ActivityStatus, ActivityState } from '../data/types'
 
@@ -14,6 +16,15 @@ const buildKey = (dateKey: string) => `progress_${dateKey}`
 
 export function useDailyTracker(dateKey?: string) {
   const key = dateKey ?? todayKey()
+  const { user } = useAuth()
+  
+  // Use Firestore hook directly to access loading/error states
+  const shouldUseFirestore = user !== null
+  const { 
+    loading: firestoreLoading, 
+    error: firestoreError 
+  } = useFirestoreDailyProgress(shouldUseFirestore ? key : '')
+  
   const [progress, setProgress] = useStorage<DailyProgress>(
     buildKey(key),
     { ...EMPTY_PROGRESS, date: key },
@@ -192,6 +203,8 @@ export function useDailyTracker(dateKey?: string) {
 
   return {
     progress: validProgress,
+    loading: shouldUseFirestore ? firestoreLoading : false,
+    error: shouldUseFirestore ? firestoreError : null,
     toggleFood,
     isFoodChecked,
     toggleSupplement,

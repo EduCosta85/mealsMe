@@ -1,7 +1,42 @@
+/**
+ * Storage Layer
+ * 
+ * This module provides two types of storage:
+ * 
+ * 1. **localStorage** (via `storage` object):
+ *    - For app-level settings (theme, preferences, etc.)
+ *    - Non-user-specific data
+ *    - Works offline
+ * 
+ * 2. **Firestore** (via exported functions):
+ *    - For user-specific data (daily progress, meals, etc.)
+ *    - Synced across devices
+ *    - Requires authentication
+ * 
+ * Usage:
+ * ```typescript
+ * // App settings (localStorage)
+ * storage.set('theme', 'dark')
+ * const theme = storage.get<string>('theme')
+ * 
+ * // User data (Firestore)
+ * await saveDailyProgress(userId, date, data)
+ * const progress = await getDailyProgress(userId, date)
+ * ```
+ */
+
+// ============================================================================
+// localStorage for App-Level Settings (Non-User Data)
+// ============================================================================
+
 const STORAGE_PREFIX = 'mealsme_'
 
 const buildKey = (key: string): string => `${STORAGE_PREFIX}${key}`
 
+/**
+ * localStorage storage for app-level settings
+ * Use this for non-user-specific data like theme, preferences, etc.
+ */
 export const storage = {
   get<T>(key: string): T | null {
     try {
@@ -48,3 +83,22 @@ export const storage = {
     return result
   },
 }
+
+// ============================================================================
+// Firestore for User Data
+// ============================================================================
+
+/**
+ * Firestore storage functions for user-specific data
+ * Re-exported from firestore-storage.ts for convenience
+ * 
+ * These functions require:
+ * - User to be authenticated
+ * - Valid userId parameter
+ * - Network connection (for initial load)
+ */
+export { 
+  getDailyProgress, 
+  saveDailyProgress, 
+  deleteDailyProgress 
+} from './firestore-storage'

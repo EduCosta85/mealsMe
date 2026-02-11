@@ -13,7 +13,8 @@ import {
   GoogleAuthProvider,
   type User,
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
+import { createUserProfile } from '../services/userProfile';
 
 /**
  * Authentication context type definition
@@ -62,11 +63,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * Listen to Firebase auth state changes
    * Automatically syncs user state on login/logout and page reload
+   * Auto-creates user profile in Firestore on first login
    */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       auth,
-      (user) => {
+      async (user) => {
+        if (user) {
+          // Auto-create user profile on first login
+          // Uses merge: true to avoid overwriting existing profiles
+          try {
+            await createUserProfile(db, user);
+          } catch (err) {
+            console.error('Failed to create user profile:', err);
+            // Don't block login if profile creation fails
+          }
+        }
         setUser(user);
         setLoading(false);
       },

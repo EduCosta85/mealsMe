@@ -185,5 +185,47 @@ service cloud.firestore {
       
       allow delete: if isSignedIn() && isOwner(userId);
     }
+
+    // ============================================
+    // USER PROFILE
+    // ============================================
+    
+    match /users/{userId}/profile/{profileId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && request.resource.data.userId == userId;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('createdAt');
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // ============================================
+    // DAILY PROGRESS
+    // ============================================
+    
+    match /users/{userId}/dailyProgress/{progressId} {
+      allow create: if isSignedIn() 
+        && isOwner(userId)
+        && hasRequiredFields(request.resource.data, ['date', 'userId'])
+        && isValidString(request.resource.data.date, 20)
+        && request.resource.data.userId == userId
+        && request.resource.data.waterMl is number
+        && request.resource.data.waterMl >= 0
+        && request.resource.data.waterMl <= 10000;
+      
+      allow update: if isSignedIn() 
+        && isOwner(userId)
+        && isImmutable('userId')
+        && isImmutable('date')
+        && request.resource.data.waterMl is number
+        && request.resource.data.waterMl >= 0
+        && request.resource.data.waterMl <= 10000;
+      
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
   }
 }

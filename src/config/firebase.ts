@@ -78,20 +78,24 @@ export const db: Firestore = getFirestore(app);
  * Allows the app to work offline by caching Firestore data locally
  * Automatically syncs changes when back online
  */
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    // Multiple tabs open, persistence can only be enabled in one tab at a time
-    console.warn(
-      'Firestore persistence failed: Multiple tabs open. ' +
-      'Persistence can only be enabled in one tab at a time.'
-    );
-  } else if (err.code === 'unimplemented') {
-    // Browser doesn't support IndexedDB persistence
-    console.warn(
-      'Firestore persistence failed: Browser does not support offline persistence.'
-    );
-  } else {
-    // Unexpected error
-    console.error('Firestore persistence error:', err);
-  }
-});
+enableIndexedDbPersistence(db)
+  .then(() => {
+    console.log('✅ Firestore offline persistence enabled');
+  })
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time
+      console.warn(
+        'Firestore persistence failed: Multiple tabs open. ' +
+        'Persistence can only be enabled in one tab at a time.'
+      );
+    } else if (err.code === 'unimplemented') {
+      // Browser doesn't support IndexedDB persistence
+      console.warn(
+        'Firestore persistence failed: Browser does not support offline persistence.'
+      );
+    } else {
+      // Unexpected error
+      console.error('Firestore persistence error:', err);
+    }
+  });

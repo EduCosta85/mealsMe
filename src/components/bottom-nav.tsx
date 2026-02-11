@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
-type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance'
+type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
 
 interface BottomNavProps {
   readonly active: Tab
@@ -14,6 +14,7 @@ const TABS: readonly { id: Tab; label: string; icon: string }[] = [
   { id: 'finance', label: 'Finanças', icon: '💰' },
   { id: 'training', label: 'Treino', icon: '🏋️' },
   { id: 'history', label: 'Histórico', icon: '📈' },
+  { id: 'settings', label: 'Config', icon: '⚙️' },
 ]
 
 export function BottomNav({ active, onChange }: BottomNavProps) {
@@ -23,14 +24,18 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
   // Determine active tab from location
   // Note: pathname is relative to basename, so it will be '/finance' not '/mealsMe/finance'
   const isFinanceRoute = location.pathname.startsWith('/finance') || location.pathname === '/finance'
-  const currentTab = isFinanceRoute ? 'finance' : active
+  const isSettingsRoute = location.pathname.startsWith('/settings') || location.pathname === '/settings'
+  const currentTab = isFinanceRoute ? 'finance' : isSettingsRoute ? 'settings' : active
 
   const handleTabClick = (tab: Tab) => {
     if (tab === 'finance') {
       // Navigate to finance route
       navigate('/finance')
-    } else if (isFinanceRoute) {
-      // If on finance route, go back to home first
+    } else if (tab === 'settings') {
+      // Navigate to settings route
+      navigate('/settings')
+    } else if (isFinanceRoute || isSettingsRoute) {
+      // If on finance or settings route, go back to home first
       navigate('/')
       // Then set the tab after a small delay to ensure navigation completes
       setTimeout(() => onChange(tab), 10)

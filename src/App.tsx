@@ -26,8 +26,9 @@ import RecurringPage from './pages/finance/recurring'
 
 // Auth Pages
 import LoginPage from './pages/login'
+import SettingsPage from './pages/settings'
 
-type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance'
+type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
 
 /**
  * Main App Component with Tab-Based Navigation
@@ -144,8 +145,25 @@ function App() {
             }
           />
           
-          {/* Tab-Based Navigation (Existing Routes) */}
-          <Route path="/" element={<TabBasedApp />} />
+          {/* Settings Route (Protected) */}
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Tab-Based Navigation (Protected) */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <TabBasedApp />
+              </ProtectedRoute>
+            }
+          />
           
           {/* Catch-all redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
