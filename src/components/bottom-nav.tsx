@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 
-type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
+type Tab = 'agenda' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
 
 interface BottomNavProps {
   readonly active: Tab
@@ -8,7 +8,7 @@ interface BottomNavProps {
 }
 
 const TABS: readonly { id: Tab; label: string; icon: string }[] = [
-  { id: 'today', label: 'Hoje', icon: '📋' },
+  { id: 'agenda', label: 'Agenda', icon: '📅' },
   { id: 'week', label: 'Semana', icon: '📊' },
   { id: 'shopping', label: 'Compras', icon: '🛒' },
   { id: 'finance', label: 'Finanças', icon: '💰' },

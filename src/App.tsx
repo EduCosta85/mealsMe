@@ -6,7 +6,7 @@ import { Layout } from './components/layout'
 import { BottomNav } from './components/bottom-nav'
 import { ReloadPrompt } from './components/reload-prompt'
 import { FloatingWaterButton } from './components/floating-water-button'
-import { TodayPage } from './pages/today'
+import { AgendaPage } from './pages/agenda'
 import { WeekPage } from './pages/week'
 import { ShoppingPage } from './pages/shopping'
 import { TrainingPage } from './pages/training'
@@ -28,23 +28,24 @@ import RecurringPage from './pages/finance/recurring'
 import LoginPage from './pages/login'
 import SettingsPage from './pages/settings'
 
-type Tab = 'today' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
+type Tab = 'agenda' | 'week' | 'shopping' | 'training' | 'history' | 'finance' | 'settings'
 
 /**
  * Main App Component with Tab-Based Navigation
  * 
  * Wraps existing tab navigation with React Router for finance pages.
  * Finance tab navigates to /finance route, other tabs remain tab-based.
+ * Default tab is 'agenda' (timeline view of today's schedule).
  */
 function TabBasedApp() {
-  const [activeTab, setActiveTab] = useState<Tab>('today')
+  const [activeTab, setActiveTab] = useState<Tab>('agenda')
   const tracker = useDailyTracker()
   const plan = useMemo(() => getDayPlan(new Date()), [])
   const targetMl = plan.waterLiters * 1000
 
   return (
     <Layout>
-      {activeTab === 'today' && <TodayPage />}
+      {activeTab === 'agenda' && <AgendaPage />}
       {activeTab === 'week' && <WeekPage />}
       {activeTab === 'shopping' && <ShoppingPage />}
       {activeTab === 'training' && <TrainingPage />}
@@ -67,7 +68,7 @@ function TabBasedApp() {
  * existing tab-based navigation for other sections.
  * 
  * Routes:
- * - / - Tab-based navigation (today, week, shopping, training, history)
+ * - / - Tab-based navigation (agenda, week, shopping, training, history)
  * - /login - Public login page
  * - /finance/* - Protected finance routes (requires authentication)
  */
