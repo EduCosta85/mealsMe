@@ -95,9 +95,16 @@ export const saveDailyProgress = async (
   try {
     const docRef = getDocRef(userId, date)
     
+    // Add userId and date to data (required by Firestore rules)
+    const dataWithMetadata = {
+      ...data,
+      userId,
+      date,
+    }
+    
     // Use setDoc to create or overwrite document
     // This matches localStorage behavior where set() overwrites
-    await setDoc(docRef, data)
+    await setDoc(docRef, dataWithMetadata)
   } catch (error) {
     if (isFirestoreError(error)) {
       switch (error.code) {

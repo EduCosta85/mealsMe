@@ -5,6 +5,7 @@
  * Handles profile creation on first login and lastLogin updates on subsequent logins.
  * 
  * Data structure: /users/{userId}/profile/
+ *   - userId: string
  *   - email: string
  *   - displayName: string
  *   - photoURL: string
@@ -25,6 +26,7 @@ import type { User } from 'firebase/auth';
  * User profile data structure stored in Firestore
  */
 export interface UserProfile {
+  readonly userId: string;
   readonly email: string;
   readonly displayName: string;
   readonly photoURL: string;
@@ -76,6 +78,7 @@ export async function createUserProfile(
 
     // Build profile data
     const profileData: UserProfile = {
+      userId: user.uid,
       email: user.email || '',
       displayName: user.displayName || '',
       photoURL: user.photoURL || '',
