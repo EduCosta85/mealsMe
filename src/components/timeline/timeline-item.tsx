@@ -63,15 +63,45 @@ const getStatusBadge = (status: ItemStatus) => {
 }
 
 /**
- * Get all available status options for dropdown
+ * Get all available status options with styling
  */
-const getStatusOptions = (): Array<{ value: ActivityStatus; label: string; icon: string }> => {
+const getStatusOptions = (): Array<{ 
+  value: ActivityStatus
+  label: string
+  icon: string
+  colors: string
+}> => {
   return [
-    { value: 'completed', label: 'Completo', icon: '✓' },
-    { value: 'skipped', label: 'Pulado', icon: '⏭️' },
-    { value: 'postponed', label: 'Adiado', icon: '⏸️' },
-    { value: 'pending', label: 'Pendente', icon: '⚪' },
-    { value: 'missed', label: 'Perdido', icon: '❌' }
+    { 
+      value: 'completed', 
+      label: 'Completo', 
+      icon: '✓',
+      colors: 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200'
+    },
+    { 
+      value: 'skipped', 
+      label: 'Pulado', 
+      icon: '⏭️',
+      colors: 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'
+    },
+    { 
+      value: 'postponed', 
+      label: 'Adiado', 
+      icon: '⏸️',
+      colors: 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200'
+    },
+    { 
+      value: 'pending', 
+      label: 'Pendente', 
+      icon: '⚪',
+      colors: 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
+    },
+    { 
+      value: 'missed', 
+      label: 'Perdido', 
+      icon: '❌',
+      colors: 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
+    }
   ]
 }
 
@@ -238,23 +268,23 @@ export function TimelineItemComponent({
         >
           {/* Status Change Buttons */}
           <div className="mb-4">
-            <p className="text-xs font-medium text-gray-600 mb-2">Alterar status:</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2.5">Alterar status:</p>
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleStatusChange(option.value)}
                   className={`
-                    flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium
+                    flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 text-sm font-semibold
                     transition-all duration-200
                     ${status === option.value 
-                      ? 'bg-primary-100 text-primary-800 border-primary-300 ring-2 ring-primary-200' 
-                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                      ? `${option.colors} ring-2 ring-offset-2 ring-current shadow-md scale-105` 
+                      : `${option.colors} opacity-70 hover:opacity-100 hover:shadow-sm`
                     }
-                    active:scale-95
+                    active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2
                   `}
                 >
-                  <span>{option.icon}</span>
+                  <span className="text-base">{option.icon}</span>
                   <span>{option.label}</span>
                 </button>
               ))}
